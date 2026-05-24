@@ -62,7 +62,7 @@ services:
 
  kongair-seating:
   build:
-    context: ./seating
+    context: ./services/seating
     dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-seating
@@ -77,7 +77,7 @@ services:
 
  kongair-operations:
   build:
-    context: ./operations
+    context: ./services/operations
     dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-operations
@@ -92,7 +92,7 @@ services:
 
  kongair-ancillary:
   build:
-    context: ./ancillary
+    context: ./services/ancillary
     dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-ancillary

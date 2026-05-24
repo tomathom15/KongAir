@@ -1,135 +1,120 @@
-# KongAir
+# KongAir — APIOps Demo for Helsinki
 
-This repository implements an example engineering organization for a fictitious airline, KongAir. Included in the repo are [APIOps](https://github.com/Kong/go-apiops) pipelines for Kong Gateway and Kong Konnect. This example is meant to mimic a multi-service multi-repo environment, but is modeled as a shared monorepo for simplicity.  There are 4 example engineering teams, which have their code and configurations stored in folders off the top level:
+This repository is the demo environment for **APIOps Meetup Helsinki** — a live presentation on API Governance and the journey from discovering "dark APIs" to enforcing platform standards.
 
-* The [flight-data](flight-data/) team owns two public facing APIs that serve KongAir's flight data information services
-including the [routes](flight-data/routes/) and [flights](flight-data/flights/) services.
-* The [sales](sales/) engineering team owns two services that service customer needs. The [customer](/sales/customer/)
-service hosts customer information including payment methods, frequent flyer information, etc...
-The [bookings](/sales/bookings/) service manages customer flight bookings and depends on the public flight-data team
-services.
-* The [experience](experience/) team owns one service. This team uses GraphQL and builds "experience" APIs to drive applications. The experience APIs aggregate the other KongAir REST APIs to make a dynamic unified API for applications.
-* The [platform](platform/) team is responsible for populating certain kong entities and apply governance
-rules, but doesn't own any service. It mimics the typical responsibility of a central team that manages shared infastructure, like API Gateways.
+## The Two-Act Demo
 
+### Act 1: The Dark
+APIs exist and are running, but nobody knows what's really there. This act showcases the **discovery problem**:
+- Undocumented API endpoints in production (dark APIs)
+- Unknown traffic patterns and usage
+- No governance, no contracts, no visibility
 
-## Workflows
+The APIOps pipeline is used live to discover and document these dark APIs via Insomnia → automated testing → deployment to Kong.
 
-Automated APIOps processes are exemplified in [GitHub Actions workflows](.github/workflows) using the Kong APIOps capabilities. There are 4 workflows defined:
+### Act 2: The Light
+The same APIs, now properly governed:
+- Specs documented and published in Dev Portal
+- Standards enforced via Spectral linting
+- Contract and security testing built into the pipeline
+- Traffic visible and managed in Kong analytics
 
-### Stage changes for Kong
-[This workflow](.github/workflows/stage-changes-for-kong.yaml) stages changes for the Kong Gateway configuration. It shows how to detect breaking changes in OAS specifications, and how to run API contract testing, security testing and load testing based on an OAS specification.
+## Architecture
 
-#### Jobs Overview
+- **Two Konnect regions**: US (Act 1 — live demo), AU (Act 2 — pre-staged governance)
+- **Local backends**: KongAir services running via Docker Compose on OrbStack
+- **GitHub Actions pipeline**: Running on a local self-hosted runner inside OrbStack
+- **Traffic injector**: Generates realistic airline usage patterns (10–20 TPS)
 
-1. **Job: `has-changes`**
-   - Checks if there are any changes in relevant files like specifications, configurations, or pipeline files. The following jobs will only execute if there are relevant changes.
+## Quick Start (OrbStack)
 
-2. **Job: `oas-break`**
-   - Checks for breaking changes in the OpenAPI Specifications (OAS) and creates an issue if any are found. This is an example issue created by the workflow:
-
-   ![Example Issue created](images/OAS-breaking-change.png)
-
-   In addition, more detailed information appears as a comment in the pull request:
-
-   ![Detailed breaking change](images/detailed-breaking-change.png)
-
-3. **Job: `contract-test`**
-   - Runs contract testing using SchemaThesis based on the OpenAPI specifications of the services. Looking at the action output, you can see the result of the test:
-
-   ![Schemathesis report](images/schemathesis.png)
-
-4. **Job: `security-test`**
-   - Runs security testing using OWASP ZAP Scan on the services' OpenAPI specifications. The result of the test will be informed via an Issue:
-
-   ![ZAP report](images/zap-api-scan.png)
-
-
-5. **Job: `load-test`**
-   - Executes load testing using K6, generating scripts from the OpenAPI specifications. Looking at the action output, you can see the result of the test:
-
-   ![K6 report](images/load-test-k6.png)
-
-6. **Job: `oas-to-kong`**
-   - Converts OpenAPI Specifications to Kong configurations, combines them, and creates a pull request for the changes.
-
-7. **Job: `oas-changelog`**
-   - Generates and posts a changelog of differences between the previous and current OAS for all services as a PR comment.
-
-
-The following diagram illustrates the jobs dependencies:
-
-```mermaid
-graph TD;
-  A[has-changes] -->|changes detected| B[oas-break];
-  A -->|changes detected| C[contract-test];
-  A -->|changes detected| D[security-test];
-  A -->|changes detected| E[load-test];
-  B --> F[oas-to-kong];
-  C --> F;
-  D --> F;
-  F --> G[oas-changelog];
+### Start the backends
+```bash
+docker-compose -f docker-compose-orbstack.yaml up -d
 ```
 
-### Stage Kong configuration for production
-[This workflow](.github/workflows/stage-kong-for-PRD.yaml) stages changes for the Kong Gateway production configuration.
+This starts all KongAir services (flights, routes, bookings, customers, experience) locally.
 
-#### Jobs Overview
-
-1. **Job: `stage-kong-for-prd`**
-   - Stages the updated Kong configuration for production by copying the generated file, calculates configuration differences, and creates a pull request to deploy the changes to production.
-
-### Deploy Kong to production
-
-[This workflow](.github/workflows/deploy-kong-PRD.yaml) deploys changes to the Kong Gateway.
-
-#### Jobs Overview
-
-1. **Job: `deploy-kong`**
-   - Checks out the repository, sets up the Deck tool, and synchronizes the Kong configuration with the appropriate deployment target (Konnect, Kong EE, or Kong Ingress Controller) based on the environment variable DEPLOY_TARGET.
-
-### Generate docker images
-
-[This workflow](.github/workflows/docker.yaml) builds and pushes Docker images for each one of the KongAir services.
-#### Jobs Overview
-
-1. **Job: `docker`**
-   - Checks out the repository, sets up QEMU and Docker Buildx, logs into Docker Hub, and builds and pushes Docker images for each specified service using a matrix strategy.
-
-## How to use this repository
-
-### Fork the repository
-
-To run the workflows, first fork this repository into your own GitHub account.
-
-### Enable issue creation
-
-Once the repository is forked in your own account, make sure to enable issue creation. Go to *Settings* and under *Features*, make sure to enable *Issues*.
-
-### Change the repository name in docker.yaml
-
-Update the following section of [docker.yaml](.github/workflows/docker.yaml) to point to your GitHub packages endpoint by changing the user name in the last line:
-
-```
-      - name: Build and push
-        uses: docker/build-push-action@v4
-        with:
-          context: "${{ matrix.app.dir }}/${{ matrix.app.name }}"
-          push: true
-          platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/<your_user_name>/kongair-${{ matrix.app.name }}:latest
+### Stop everything
+```bash
+docker-compose -f docker-compose-orbstack.yaml down
 ```
 
-### Create a Schemathesis account
+Or use the included script:
+```bash
+./kill-all.sh
+```
 
-Optionally, enable [Schemathesis GitHub app](https://github.com/apps/schemathesis) to receive test results as comments in your GitHub pull requests. To use this feature, both the token and the GitHub app are required. Obtain your token by signing up on [Schemathesis.io](https://app.schemathesis.io/auth/sign-up/).
-If you have a token, create a secret and uncomment the relevant lines in [the stage changes for kong workflow](.github/workflows/stage-changes-for-kong.yaml) under the *contract-test* job.
+## Repository Structure
 
-### Create secrets and variables
+```
+tomathom15/KongAir
+├── flight-data/          # Flights and routes APIs (with dark endpoints in Act 1)
+├── sales/                # Bookings and customer services
+├── experience/           # GraphQL aggregation layer
+├── platform/             # Kong/Konnect governance configs
+├── PRD/kong/             # Production Kong configs
+├── tf/                   # Terraform for Konnect provisioning (US + AU regions)
+├── .github/workflows/    # APIOps CI/CD pipelines
+├── cfg/portal/           # Dev Portal config (Act 2)
+├── traffic-injector/     # Realistic traffic generator for demo
+├── scripts/              # Deployment and sync utilities
+├── docs/                 # OrbStack and Actions runner setup guides
+├── docker-compose.yaml   # Standard setup
+└── docker-compose-orbstack.yaml  # OrbStack-optimized (ARM64)
+```
 
-Go to *Settings* -> *Secrets and Variables* and create the following:
-- Secrets
-    - KONNECT_PAT: Your Konnect Personal Access Token
-    - SCHEMATHESIS_TOKEN: Your Schemathesis token in case you have a Schemathesis account.
-- Environment Variables:
-    - DEPLOY_TARGET: Specify the target platform in which to deploy the kong configuration. Possible values are KONNECT for Kong Konnect, EE for Kong Enterprise Edition or KIC or Kong Ingress Controller.
+## APIOps Pipeline (Act 1)
+
+The centerpiece of Act 1 is a GitHub Actions workflow that demonstrates end-to-end APIOps:
+
+1. **OAS Spec Change** (Insomnia) → PR in GitHub
+2. **Breaking Change Detection** → GitHub Issue
+3. **Contract Testing** (Schemathesis) → Verify API contracts
+4. **Security Testing** (OWASP ZAP) → API security scan
+5. **Load Testing** (K6) → Performance baseline
+6. **OAS → Kong Config** (go-apiops) → Generate Kong configuration
+7. **Deploy to Konnect** (deck) → Live in Kong
+
+Key workflows:
+- [stage-changes-for-kong.yaml](.github/workflows/stage-changes-for-kong.yaml) — Full APIOps pipeline
+- [apply-terraform.yaml](.github/workflows/apply-terraform.yaml) — Konnect provisioning
+- [deploy-kong-PRD.yaml](.github/workflows/deploy-kong-PRD.yaml) — Production sync
+
+## Demo Extensions
+
+### Traffic Injector
+Generates realistic KongAir usage patterns — search flights, book, check status — at 10–20 TPS. Makes metrics and analytics in Konnect come alive during the demo.
+
+### Dark API Endpoints
+Undocumented sub-paths added to the KongAir services:
+- `/flights/search` — Flight search without booking
+- `/flights/details` — Single flight details
+- `/flights/history` — User's flight history
+- Similar dark endpoints on `/bookings`, `/customers`
+
+These exist in the backends but are **not documented in OAS specs** and **not configured in Kong** — the discovery problem Act 1 solves.
+
+### Spectral Rules
+Static copies of API design rules in each OAS directory. Insomnia loads them locally, demonstrating live enforcement as specs are edited.
+
+## Setup Guides
+
+- [OrbStack Backend Setup](docs/orbstack-setup.md)
+- [GitHub Actions Local Runner](docs/actions-runner-setup.md)
+
+## Secrets
+
+**Never commit secrets.** Use:
+- `.env` file (gitignored) for local use
+- GitHub Actions Secrets for workflows: `KONNECT_PAT`
+- Terraform variables: `terraform.tfvars` (gitignored)
+
+The KONNECT_PAT is managed separately and not stored in the repo.
+
+## More Information
+
+- [Kong APIOps](https://github.com/Kong/go-apiops)
+- [Kong Konnect Developer Portal](https://docs.konghq.com/konnect/)
+- [Spectral OpenAPI Linting](https://www.stoplight.io/open-source/spectral)
+- [Schemathesis API Testing](https://schemathesis.io/)

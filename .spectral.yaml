@@ -1,0 +1,173 @@
+extends: spectral:oas
+overrides:
+  - files:
+      - docs/openapi/**/*.yaml
+    rules:
+      oas3-api-servers: off
+
+rules:
+  # Field naming consistency rules
+  field-naming-consistency:
+    description: Field names should use consistent casing throughout the API
+    message: "Field naming inconsistency detected: {{property}} uses mixed casing (camelCase and snake_case)"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
+    then:
+      function: casing
+      functionOptions:
+        type: camel
+
+  snake-case-consistency:
+    description: When using snake_case, ensure consistency across all similar fields
+    message: "Timestamp fields should be consistent: found both '{{property}}' and alternative naming patterns"
+    severity: error
+    given: $.paths.[*].*.responses.[*].content.application/json.schema
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(timestamp|last_updated|created_at|updated_at|modified_at)$"
+
+  # Timestamp format consistency
+  timestamp-format-consistency:
+    description: Timestamps must use consistent format (ISO 8601 or Unix, not mixed)
+    message: "{{property}} has inconsistent timestamp format - should use ISO 8601 (date-time) or Unix epoch consistently"
+    severity: error
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.type=='integer' || @.format=='date-time')]
+    documentationUrl: https://spec.openapis.org/oas/v3.0.3#data-types
+
+  # Price/cost field naming
+  price-field-consistency:
+    description: Price-related fields must use consistent naming
+    message: "Price field naming inconsistency: use either 'price', 'cost', or 'pricing' consistently across the API"
+    severity: error
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
+    then:
+      function: pattern
+      functionOptions:
+        notMatch: "(price|cost|pricing)"
+
+  # Error response structure consistency
+  error-response-consistency:
+    description: All error responses should use the same structure
+    message: "Error response structure inconsistency at {{path}}"
+    severity: warn
+    given: $.paths.[*].*.responses[?(@property >= 400)].content.application/json.schema
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required: [error, message, timestamp]
+          properties:
+            error:
+              type: string
+            message:
+              type: string
+            timestamp:
+              type: string
+              format: date-time
+
+  # Enum casing consistency
+  enum-casing-consistency:
+    description: Enum values should use consistent casing
+    message: "Enum {{property}} has inconsistent casing - use either lowercase, UPPERCASE, or kebab-case consistently"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.enum)]
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z0-9-]+$"
+
+  # Dietary options format consistency
+  dietary-array-consistency:
+    description: Dietary preferences should always be arrays, not comma-separated strings
+    message: "Dietary options at {{path}} should be consistently formatted as array"
+    severity: error
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.properties.dietary_options || @.properties.options)]
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: array
+          items:
+            type: string
+
+  # Field naming pattern for IDs
+  id-field-naming:
+    description: ID fields should use consistent naming pattern
+    message: "ID field {{property}} should use consistent pattern (e.g., 'id', 'booking_id', or 'bookingId')"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/.*[Ii]d.*/))]
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z_]*id$|^[a-zA-Z]*[Ii]d$"
+
+  # Response field naming for same concept
+  status-field-naming:
+    description: Status fields should use consistent naming
+    message: "Status/state field at {{path}} should use 'status' consistently"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/.*status.*|.*state.*/i))]
+    then:
+      function: casing
+      functionOptions:
+        type: snake
+
+  # Required error fields
+  error-required-fields:
+    description: All error responses must include standardized fields
+    message: "Error response at {{path}} missing required field: {{missing}}"
+    severity: error
+    given: $.paths.[*].*.responses[?(@property >= 400)]
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          required: [message]
+
+  # Numeric vs string consistency for codes
+  http-status-code-type:
+    description: HTTP status codes should be integers, not strings
+    message: "Status code field at {{path}} should be integer type, not string"
+    severity: warn
+    given: $.paths.[*].*.responses[?(@property >= 400)].content.application/json.schema.properties.status
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: integer
+
+  # Timestamp field naming
+  timestamp-field-naming:
+    description: Timestamp fields should use consistent naming
+    message: "Timestamp field at {{path}} uses '{{property}}' - should use one of: 'timestamp', 'created_at', 'updated_at', 'last_updated'"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.format=='date-time' || @.type=='integer' && @.description.match(/timestamp|epoch/i))]
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(timestamp|created_at|updated_at|last_updated|last_updated_at|last_updated_ms)$"
+
+  # Pagination field naming
+  pagination-field-consistency:
+    description: Pagination should use consistent field names
+    message: "Pagination fields should be consistent - use 'count'/'limit' or 'totalCount'/'pageSize'"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/total|count|limit|size|page/i))]
+    then:
+      function: casing
+      functionOptions:
+        type: camel
+
+  # Null vs required field consistency
+  nullable-field-consistency:
+    description: Similar fields should have consistent nullability
+    message: "Field {{property}} nullability should match similar fields in the API"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
+    then:
+      - function: truthy
+        functionOptions:
+          value: false

@@ -1,0 +1,178 @@
+openapi: 3.0.0
+info:
+  title: KongAir Seating Service
+  version: 1.0.0
+  description: |
+    Flight seating management service (Dark API - Act 1).
+
+    ⚠️ NOTE: This service intentionally contains data inconsistencies that will be addressed in Act 2:
+    - Field naming: flightId (camelCase) vs flight_id (snake_case)
+    - Timestamp formats: Unix epoch vs ISO 8601
+    - Error response structure varies by endpoint
+    - Response field naming inconsistent (totalCapacity vs totalSeats)
+
+servers:
+  - url: http://localhost:5055
+    description: Local development
+
+paths:
+  /flights/{flightId}/seatingMap:
+    get:
+      summary: Get seating map for a flight
+      operationId: getSeatingMap
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: KA0924
+      responses:
+        '200':
+          description: Seating map retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flightId:
+                    type: string
+                  aircraft:
+                    type: string
+                  totalCapacity:
+                    type: integer
+                  cabinLayout:
+                    type: object
+                    properties:
+                      cabin:
+                        type: string
+                      rows:
+                        type: integer
+                      seatsPerRow:
+                        type: integer
+                      layout:
+                        type: string
+                  seatingChart:
+                    type: string
+        '404':
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                  code:
+                    type: string
+
+  /flights/{flightId}/seats:
+    get:
+      summary: Get seats for a flight (available or all)
+      operationId: getSeats
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: KA0924
+        - name: available
+          in: query
+          required: false
+          schema:
+            type: string
+            enum: ['true', 'false']
+      responses:
+        '200':
+          description: Seats retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flightID:
+                    type: string
+                    description: Note inconsistent casing (flightID not flightId)
+                  totalCount:
+                    type: integer
+                  items:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        seatNumber:
+                          type: string
+                        status:
+                          type: string
+                          enum: [available, occupied]
+                        price:
+                          type: number
+                          nullable: true
+                        class:
+                          type: string
+                        createdAt:
+                          type: integer
+                          description: Unix timestamp
+        '404':
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  err:
+                    type: string
+                    description: Note different field name (err not error)
+
+  /flights/{flightId}/seats/{seatNumber}:
+    get:
+      summary: Get details for a specific seat
+      operationId: getSeatDetail
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: KA0924
+        - name: seatNumber
+          in: path
+          required: true
+          schema:
+            type: string
+          example: '1A'
+      responses:
+        '200':
+          description: Seat detail retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flight_id:
+                    type: string
+                    description: Note snake_case here (different from path param)
+                  seat_number:
+                    type: string
+                  available:
+                    type: boolean
+                  class:
+                    type: string
+                  price:
+                    type: number
+                    nullable: true
+                  lastUpdated:
+                    type: string
+                    format: date-time
+                    description: ISO 8601 (different from createdAt Unix format above)
+        '404':
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    description: Note different field name (message not error/err)

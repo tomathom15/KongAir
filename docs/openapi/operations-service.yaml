@@ -1,0 +1,210 @@
+openapi: 3.0.0
+info:
+  title: KongAir Operations Service
+  version: 1.0.0
+  description: |
+    Flight operations service providing status, crew, and gate information (Dark API - Act 1).
+
+    ⚠️ NOTE: This service intentionally contains data inconsistencies that will be addressed in Act 2:
+    - Status enum: inconsistent casing (on-time vs DELAYED vs cancelled)
+    - Timestamp formats: ISO 8601 vs Unix epoch (mixed in same response)
+    - Field naming: captain_name vs captain, crew_size vs team_size
+    - Error response structure varies by endpoint
+    - Different response structures per endpoint
+
+servers:
+  - url: http://localhost:5056
+    description: Local development
+
+paths:
+  /flights/{flightNum}/status:
+    get:
+      summary: Get flight status
+      operationId: getFlightStatus
+      parameters:
+        - name: flightNum
+          in: path
+          required: true
+          schema:
+            type: string
+          example: KA0924
+      responses:
+        '200':
+          description: Flight status retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flightNo:
+                    type: string
+                  operational_status:
+                    type: string
+                    enum: [on-time, DELAYED, cancelled]
+                    description: Inconsistent enum casing
+                  departure:
+                    type: object
+                    properties:
+                      scheduled:
+                        type: string
+                        format: date-time
+                      actual:
+                        type: integer
+                        nullable: true
+                        description: Unix timestamp (inconsistent with scheduled)
+                      gate:
+                        type: string
+                        nullable: true
+                      terminal:
+                        type: string
+                        nullable: true
+                  arrival:
+                    type: object
+                    properties:
+                      scheduled:
+                        type: string
+                        format: date-time
+                      actual:
+                        type: string
+                        nullable: true
+                      gate:
+                        type: string
+                  delays:
+                    type: object
+                    properties:
+                      minutes:
+                        type: integer
+                        nullable: true
+                      reason:
+                        type: string
+                        nullable: true
+                  crew:
+                    type: object
+                    properties:
+                      captain_name:
+                        type: string
+                      team_size:
+                        type: integer
+                        description: Field name inconsistency (vs crew_size)
+        '404':
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  details:
+                    type: object
+                    properties:
+                      message:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+                      path:
+                        type: string
+
+  /flights/{flightNum}/crew:
+    get:
+      summary: Get crew information for a flight
+      operationId: getFlightCrew
+      parameters:
+        - name: flightNum
+          in: path
+          required: true
+          schema:
+            type: string
+          example: KA0924
+      responses:
+        '200':
+          description: Crew information retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flight:
+                    type: string
+                  crew_members:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        name:
+                          type: string
+                        role:
+                          type: string
+                        base:
+                          type: string
+                        hours_this_month:
+                          type: integer
+                  crew:
+                    type: 'null'
+                    nullable: true
+                    description: Returned as null for cancelled flights
+                  note:
+                    type: string
+                    description: Additional note field not in other responses
+        '404':
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error_code:
+                    type: integer
+                  error_message:
+                    type: string
+                    description: Different error field naming (error_message)
+
+  /flights/{flightNum}/gate:
+    get:
+      summary: Get gate and terminal information
+      operationId: getFlightGate
+      parameters:
+        - name: flightNum
+          in: path
+          required: true
+          schema:
+            type: string
+          example: KA0924
+      responses:
+        '200':
+          description: Gate information retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flight_number:
+                    type: string
+                    description: Different naming pattern (flight_number vs flightNum)
+                  departure_gate:
+                    type: string
+                    nullable: true
+                  departure_terminal:
+                    type: string
+                    nullable: true
+                  baggage_claim:
+                    type: string
+                    nullable: true
+                  last_updated_at:
+                    type: integer
+                    description: Unix timestamp
+                  next_update_in_seconds:
+                    type: integer
+        '404':
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  statusCode:
+                    type: integer
+                  msg:
+                    type: string
+                    description: Yet another error field name (msg)

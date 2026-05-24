@@ -250,6 +250,54 @@ func getTrafficPatterns(includeDark bool) []TrafficPattern {
 				weight: 0.02,
 				fn:     darkSeatMap,
 			},
+			// Seating service (port 5055)
+			TrafficPattern{
+				name:   "dark-seating-map",
+				weight: 0.04,
+				fn:     darkSeatingMap,
+			},
+			TrafficPattern{
+				name:   "dark-seat-availability",
+				weight: 0.03,
+				fn:     darkSeatAvailability,
+			},
+			// Operations service (port 5056)
+			TrafficPattern{
+				name:   "dark-flight-status",
+				weight: 0.05,
+				fn:     darkFlightStatus,
+			},
+			TrafficPattern{
+				name:   "dark-flight-crew",
+				weight: 0.02,
+				fn:     darkFlightCrew,
+			},
+			TrafficPattern{
+				name:   "dark-flight-gate",
+				weight: 0.02,
+				fn:     darkFlightGate,
+			},
+			// Ancillary service (port 5057)
+			TrafficPattern{
+				name:   "dark-booking-addons",
+				weight: 0.03,
+				fn:     darkBookingAddOns,
+			},
+			TrafficPattern{
+				name:   "dark-baggage-policy",
+				weight: 0.02,
+				fn:     darkBaggagePolicy,
+			},
+			TrafficPattern{
+				name:   "dark-flight-meals",
+				weight: 0.03,
+				fn:     darkFlightMeals,
+			},
+			TrafficPattern{
+				name:   "dark-meal-preferences",
+				weight: 0.02,
+				fn:     darkMealPreferences,
+			},
 		)
 	}
 
@@ -424,6 +472,183 @@ func darkSeatMap(client *http.Client, baseURL string) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+// Seating service dark endpoints (port 5055)
+
+func darkSeatingMap(client *http.Client, baseURL string) error {
+	// /flights/{flightId}/seatingMap
+	seatURL := "http://localhost:5055"
+	flightID := []string{"KA0924", "KA0925"}[rand.Intn(2)]
+	url := fmt.Sprintf("%s/flights/%s/seatingMap", seatURL, flightID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkSeatAvailability(client *http.Client, baseURL string) error {
+	// /flights/{flightId}/seats
+	seatURL := "http://localhost:5055"
+	flightID := []string{"KA0924", "KA0925"}[rand.Intn(2)]
+	url := fmt.Sprintf("%s/flights/%s/seats?available=%t", seatURL, flightID, rand.Float64() > 0.5)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+// Operations service dark endpoints (port 5056)
+
+func darkFlightStatus(client *http.Client, baseURL string) error {
+	// /flights/{flightNum}/status
+	opsURL := "http://localhost:5056"
+	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
+	url := fmt.Sprintf("%s/flights/%s/status", opsURL, flightNum)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkFlightCrew(client *http.Client, baseURL string) error {
+	// /flights/{flightNum}/crew
+	opsURL := "http://localhost:5056"
+	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
+	url := fmt.Sprintf("%s/flights/%s/crew", opsURL, flightNum)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkFlightGate(client *http.Client, baseURL string) error {
+	// /flights/{flightNum}/gate
+	opsURL := "http://localhost:5056"
+	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
+	url := fmt.Sprintf("%s/flights/%s/gate", opsURL, flightNum)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+// Ancillary service dark endpoints (port 5057)
+
+func darkBookingAddOns(client *http.Client, baseURL string) error {
+	// GET /bookings/{bookingId}/add-ons
+	ancillaryURL := "http://localhost:5057"
+	bookingID := "BK001"
+	url := fmt.Sprintf("%s/bookings/%s/add-ons", ancillaryURL, bookingID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkBaggagePolicy(client *http.Client, baseURL string) error {
+	// GET /routes/{routeId}/baggage-policy
+	ancillaryURL := "http://localhost:5057"
+	routeID := "LHR-SFO"
+	url := fmt.Sprintf("%s/routes/%s/baggage-policy", ancillaryURL, routeID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkFlightMeals(client *http.Client, baseURL string) error {
+	// GET /flights/{flightId}/meals
+	ancillaryURL := "http://localhost:5057"
+	flightID := "KA0924"
+	url := fmt.Sprintf("%s/flights/%s/meals", ancillaryURL, flightID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkMealPreferences(client *http.Client, baseURL string) error {
+	// GET /customer/{customerId}/meal-preferences
+	ancillaryURL := "http://localhost:5057"
+	customerID := fmt.Sprintf("CUST%d", 1000+rand.Intn(9000))
+	url := fmt.Sprintf("%s/customer/%s/meal-preferences", ancillaryURL, customerID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
 
 	io.ReadAll(resp.Body)
 	return nil

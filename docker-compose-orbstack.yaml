@@ -59,3 +59,48 @@ services:
     - kong-edu-net
   ports:
    - 5054:3000
+
+ kongair-seating:
+  build:
+    context: ./seating
+    dockerfile: Dockerfile
+  platform: linux/arm64
+  container_name: kongair-seating
+  hostname: seating.kongair
+  restart: on-failure
+  networks:
+    - kong-edu-net
+  ports:
+   - 5055:5055
+  environment:
+    - PORT=5055
+
+ kongair-operations:
+  build:
+    context: ./operations
+    dockerfile: Dockerfile
+  platform: linux/arm64
+  container_name: kongair-operations
+  hostname: operations.kongair
+  restart: on-failure
+  networks:
+    - kong-edu-net
+  ports:
+   - 5056:5056
+  environment:
+    - PORT=5056
+
+ kongair-ancillary:
+  build:
+    context: ./ancillary
+    dockerfile: Dockerfile
+  platform: linux/arm64
+  container_name: kongair-ancillary
+  hostname: ancillary.kongair
+  restart: on-failure
+  networks:
+    - kong-edu-net
+  ports:
+   - 5057:5057
+  environment:
+    - PORT=5057

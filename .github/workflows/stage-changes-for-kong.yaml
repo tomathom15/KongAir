@@ -4,11 +4,12 @@ on:
   push:
     branches:
       - main
+      - act2-standardized-services
       - workflow/**
-      - contract-test
-    paths-ignore:
-      - 'PRD/**'
-      - 'platform/kong/.generated/kong.yaml'
+    paths:
+      - 'services/**'
+      - 'infrastructure/**'
+      - '.github/workflows/stage-changes-for-kong.yaml'
   workflow_dispatch:
 
 jobs:
@@ -40,16 +41,19 @@ jobs:
           filters: |
             files:
               - '.github/workflows/stage-changes-for-kong.yaml'
-              - 'flight-data/flights/openapi.yaml'
-              - 'flight-data/flights/kong/**'
-              - 'flight-data/routes/openapi.yaml'
-              - 'flight-data/routes/kong/**'
-              - 'sales/bookings/opeanapi.yaml'
-              - 'sales/bookings/kong/**'
-              - 'sales/customer/opeanapi.yaml'
-              - 'sales/customer/kong/**'
-              - 'experience/kong/**'
-              - 'platform/kong/**'
+              - 'services/flight-data/flights/openapi.yaml'
+              - 'services/flight-data/flights/kong/**'
+              - 'services/flight-data/routes/openapi.yaml'
+              - 'services/flight-data/routes/kong/**'
+              - 'services/sales/bookings/openapi.yaml'
+              - 'services/sales/bookings/kong/**'
+              - 'services/sales/customer/openapi.yaml'
+              - 'services/sales/customer/kong/**'
+              - 'services/experience/kong/**'
+              - 'services/seating/kong/**'
+              - 'services/operations/kong/**'
+              - 'services/ancillary/kong/**'
+              - 'infrastructure/kong/**'
         
   # Check if there are breaking changes in the OAS
   # specifications of the services. If there are breaking
@@ -64,16 +68,16 @@ jobs:
     strategy:
       matrix:
         app:
-          - dir: flight-data
+          - dir: services/flight-data
             name: flights
             port: 8080
-          - dir: flight-data
+          - dir: services/flight-data
             name: routes
             port: 8081
-          - dir: sales
+          - dir: services/sales
             name: bookings
             port: 8082
-          - dir: sales
+          - dir: services/sales
             name: customer
             port: 8083
           
@@ -119,26 +123,26 @@ jobs:
       - name: Contract testing flights
         uses: schemathesis/action@v1
         with:
-          schema: flight-data/flights/openapi.yaml
+          schema: services/flight-data/flights/openapi.yaml
           base-url: http://localhost:8080
           #token: ${{ secrets.SCHEMATHESIS_TOKEN }}
       - name: Contract testing routes
         uses: schemathesis/action@v1
         with:
-          schema: flight-data/routes/openapi.yaml
+          schema: services/flight-data/routes/openapi.yaml
           base-url: http://localhost:8081
           #token: ${{ secrets.SCHEMATHESIS_TOKEN }}
       - name: Contract testing bookings
         uses: schemathesis/action@v1
         with:
-          schema: sales/bookings/openapi.yaml
+          schema: services/sales/bookings/openapi.yaml
           base-url: http://localhost:8082
           args: '-H "x-consumer-username: dfreese"'
           #token: ${{ secrets.SCHEMATHESIS_TOKEN }}
       - name: Contract testing customer
         uses: schemathesis/action@v1
         with:
-          schema: sales/customer/openapi.yaml
+          schema: services/sales/customer/openapi.yaml
           base-url: http://localhost:8083
           args: '-H "x-consumer-username: jsmith"'
           #token: ${{ secrets.SCHEMATHESIS_TOKEN }}
@@ -152,13 +156,13 @@ jobs:
     strategy:
       matrix:
         app:
-          - dir: flight-data
+          - dir: services/flight-data
             name: flights
-          - dir: flight-data
+          - dir: services/flight-data
             name: routes
-          - dir: sales
+          - dir: services/sales
             name: bookings
-          - dir: sales
+          - dir: services/sales
             name: customer
     steps:
       - name: Checkout
@@ -197,13 +201,13 @@ jobs:
     strategy:
       matrix:
         app:
-          - dir: flight-data
+          - dir: services/flight-data
             name: flights
-          - dir: flight-data
+          - dir: services/flight-data
             name: routes
-          - dir: sales
+          - dir: services/sales
             name: bookings
-          - dir: sales
+          - dir: services/sales
             name: customer
     steps:
       - name: Checkout
@@ -272,8 +276,8 @@ jobs:
         #   and then patch the result with the data in the kong/patches.yaml
         #   and apply some tags
         run: |
-          deck file openapi2kong -s flight-data/flights/openapi.yaml | \
-            deck file patch flight-data/flights/kong/patches.yaml | \
+          deck file openapi2kong -s services/flight-data/flights/openapi.yaml | \
+            deck file patch services/flight-data/flights/kong/patches.yaml | \
             deck file add-tags -o .github/artifacts/kong/flight-data-flights-kong.yaml \
               --selector "$.services[*]" --selector "$.services[*].routes[*]" flight-data
 
@@ -282,8 +286,8 @@ jobs:
         # In two steps, convert the OpenAPI Spec to a Kong declarative configuration
         #   and then patch the result with the data in the kong/patches.yaml
         run: |
-          deck file openapi2kong -s flight-data/routes/openapi.yaml | \
-            deck file patch flight-data/routes/kong/patches.yaml | \
+          deck file openapi2kong -s services/flight-data/routes/openapi.yaml | \
+            deck file patch services/flight-data/routes/kong/patches.yaml | \
             deck file add-tags -o .github/artifacts/kong/flight-data-routes-kong.yaml \
               --selector "$.services[*]" --selector "$.services[*].routes[*]" flight-data
 
@@ -291,8 +295,8 @@ jobs:
         # In two steps, convert the OpenAPI Spec to a Kong declarative configuration
         #   and then patch the result with the data in the kong/patches.yaml
         run: |
-          deck file openapi2kong -s sales/bookings/openapi.yaml | \
-            deck file patch  sales/bookings/kong/patches.yaml | \
+          deck file openapi2kong -s services/sales/bookings/openapi.yaml | \
+            deck file patch services/sales/bookings/kong/patches.yaml | \
             deck file add-tags -o .github/artifacts/kong/sales-bookings-kong.yaml \
               --selector "$.services[*]" --selector "$.services[*].routes[*]" sales
 
@@ -300,8 +304,8 @@ jobs:
         # In two steps, convert the OpenAPI Spec to a Kong declarative configuration
         #   and then patch the result with the data in the kong/patches.yaml
         run: |
-          deck file openapi2kong -s sales/customer/openapi.yaml | \
-            deck file patch sales/customer/kong/patches.yaml | \
+          deck file openapi2kong -s services/sales/customer/openapi.yaml | \
+            deck file patch services/sales/customer/kong/patches.yaml | \
             deck file add-tags -o .github/artifacts/kong/sales-customer-kong.yaml --selector "$.services[*]" \
               --selector "$.services[*].routes[*]" sales
 
@@ -314,37 +318,19 @@ jobs:
       - name: Merge Experience API Configurations
         run: |
           deck file merge \
-            .github/artifacts/kong/kong-combined.yaml experience/kong/experience-service.yaml \
+            .github/artifacts/kong/kong-combined.yaml services/experience/kong/experience-service.yaml \
             -o .github/artifacts/kong/kong-combined.yaml
 
-      - name: Platform Team Kong Additions
-        # The platform team has their own things to add to the final Kong configuration.
-        # The platform-kong-base.yaml is a base file for any platform defaults. It will "win" over
-        #   any settings in the domain teams Kong configurations.
-        # Then the platform adds in some objects like plugins, consumers, vaults, etc..
-        # Also the platform/kong/patches.yaml is used to patch anything from the upstream
-        #   team configurations
-        # And finally a tag is added to everything managed in this process to allow
-        #   the deck tool to isolate what is managed here from entities that may be managed
-        #   elsewhere or by other tools
-        # The platform/kong/.generated/kong.yaml is the final product and is stored in the repository.
-        #   Storing the generated file in the repo is intentional,
-        #   it should help with PR reviews, transparency, and debugging.
+      - name: Infrastructure Team Kong Additions
+        # The infrastructure team has their own things to add to the final Kong configuration.
+        # Kong service configurations are merged into the final configuration.
         run: |
           deck file merge \
             .github/artifacts/kong/kong-combined.yaml \
-            platform/kong/platform-kong-base.yaml     \
-            platform/kong/consumers/*                 \
-            platform/kong/plugins/*                   \
-            platform/kong/vaults/* |                  \
-          deck file patch \
-            platform/kong/patches.yaml |
+            infrastructure/kong/*.yaml |              \
           deck file add-tags \
-            -o platform/kong/.generated/kong.yaml \
-            "platform-repo-managed"
-
-      - name: Kong linting
-        run: deck file lint -s platform/kong/.generated/kong.yaml platform/kong/lint-rulesets.yaml
+            -o .github/artifacts/kong/kong-final.yaml \
+            "infrastructure-repo-managed"
         
       - name: Upload Artifacts
         # Artifacts are the files that are built along the way of the pipeline but are not committed to the repo
@@ -371,13 +357,13 @@ jobs:
     strategy:
       matrix:
         app:
-          - dir: flight-data
+          - dir: services/flight-data
             name: flights
-          - dir: flight-data
+          - dir: services/flight-data
             name: routes
-          - dir: sales
+          - dir: services/sales
             name: bookings
-          - dir: sales
+          - dir: services/sales
             name: customer
     steps:
       - name: Checkout

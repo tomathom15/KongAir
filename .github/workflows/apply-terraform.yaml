@@ -3,7 +3,8 @@ name: Apply Terraform
 on:
   push:
     paths:
-      - 'platform/terraform/**'
+      - 'infrastructure/terraform/**'
+  workflow_dispatch:
 
 jobs:
   terraform:
@@ -12,19 +13,19 @@ jobs:
 
     steps:
     - name: Checkout repository
-      uses: actions/checkout@v2
+      uses: actions/checkout@v3
 
     - name: Set up Terraform
       uses: hashicorp/setup-terraform@v3
 
     - name: Initialize Terraform
-      working-directory: platform/terraform
+      working-directory: infrastructure/terraform
       run: terraform init
       env:
-        TF_VAR_PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        TF_VAR_PERSONAL_ACCESS_TOKEN: ${{ secrets.KONNECT_PAT }}
 
     - name: Apply Terraform
-      working-directory: platform/terraform
-      run: terraform apply -auto-approve -var "personal_access_token=${{ secrets.PERSONAL_ACCESS_TOKEN }}"
+      working-directory: infrastructure/terraform
+      run: terraform apply -auto-approve -var "personal_access_token=${{ secrets.KONNECT_PAT }}"
       env:
-        TF_VAR_PERSONAL_ACCESS_TOKEN: ${{ secrets.PERSONAL_ACCESS_TOKEN }}
+        TF_VAR_PERSONAL_ACCESS_TOKEN: ${{ secrets.KONNECT_PAT }}

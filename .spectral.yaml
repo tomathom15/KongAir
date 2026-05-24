@@ -1,0 +1,138 @@
+extends: spectral:oas
+overrides:
+  - files:
+      - docs/openapi/**/*.yaml
+    rules:
+      oas3-api-servers: off
+
+rules:
+  # Field naming consistency rules
+  field-naming-consistency:
+    description: Field names should use consistent casing throughout the API
+    message: "Field naming inconsistency detected: {{property}} uses mixed casing (camelCase and snake_case)"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
+    then:
+      function: casing
+      functionOptions:
+        type: camel
+
+  # Timestamp format consistency
+  timestamp-format-consistency:
+    description: Timestamps must use consistent format (ISO 8601 or Unix, not mixed)
+    message: "{{property}} has inconsistent timestamp format - should use ISO 8601 (date-time) or Unix epoch consistently"
+    severity: error
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.type=='integer' || @.format=='date-time')]
+    then:
+      function: truthy
+
+  # Price/cost field naming
+  price-field-consistency:
+    description: Price-related fields must use consistent naming
+    message: "Price field naming inconsistency: use either 'price', 'cost', or 'pricing' consistently across the API"
+    severity: error
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/price|cost|pricing/i))]
+    then:
+      function: truthy
+
+  # Error response consistency
+  error-response-consistency:
+    description: All error responses should use the same structure
+    message: "Error response structure inconsistency at {{path}}"
+    severity: warn
+    given: $.paths.[*].*.responses[?(@property >= 400)].content.application/json.schema
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: object
+          properties:
+            message:
+              type: string
+
+  # Enum casing consistency
+  enum-casing-consistency:
+    description: Enum values should use consistent casing
+    message: "Enum {{property}} has inconsistent casing - use either lowercase, UPPERCASE, or kebab-case consistently"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.enum)]
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z0-9-]+$|^[A-Z0-9_]+$"
+
+  # ID field naming consistency
+  id-field-naming:
+    description: ID fields should use consistent naming pattern
+    message: "ID field {{property}} should use consistent pattern"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/.*[Ii]d.*/))]
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z_]*id$|^[a-zA-Z]*[Ii]d$"
+
+  # Timestamp field naming
+  timestamp-field-naming:
+    description: Timestamp fields should use consistent naming
+    message: "Timestamp field {{property}} should use one of: timestamp, created_at, updated_at, last_updated"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.format=='date-time' || (@.type=='integer' && @.description && @.description.match(/timestamp|epoch/i)))]
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(timestamp|created_at|updated_at|last_updated|last_updated_at)$"
+
+  # Status field consistency
+  status-field-naming:
+    description: Status fields should use consistent naming
+    message: "Status field {{property}} should use consistent naming"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/status|state/i))]
+    then:
+      function: casing
+      functionOptions:
+        type: snake
+
+  # Required error message field
+  error-message-required:
+    description: All error responses must have a message field
+    message: "Error response at {{path}} should have a message field"
+    severity: error
+    given: $.paths.[*].*.responses[?(@property >= 400)].content.application/json.schema
+    then:
+      function: required
+      functionOptions:
+        required: [message]
+
+  # HTTP status code type
+  status-code-integer:
+    description: HTTP status codes in responses should be integer type
+    message: "Status code field should be integer, not {{type}}"
+    severity: warn
+    given: $.paths.[*].*.responses[?(@property >= 400)].content.application/json.schema.properties.status
+    then:
+      function: schema
+      functionOptions:
+        schema:
+          type: integer
+
+  # Camel case property naming
+  property-names-camel-case:
+    description: Property names should follow a consistent pattern
+    message: "Property {{property}} should follow consistent naming convention"
+    severity: info
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
+    then:
+      function: pattern
+      functionOptions:
+        match: "^[a-z_][a-z0-9_]*$|^[a-z][a-zA-Z0-9]*$"
+
+  # Response structure consistency
+  consistent-response-structure:
+    description: Response objects should have consistent structure
+    message: "Response structure at {{path}} should be consistent"
+    severity: warn
+    given: $.paths.[*].*.responses[?(@property == 200)].content.application/json.schema
+    then:
+      function: truthy

@@ -18,6 +18,7 @@ import (
 
 var (
 	baseURL       = flag.String("url", "http://localhost:5052", "Base URL for KongAir APIs (flights service)")
+	kongURL       = flag.String("kong", "http://localhost:8000", "Kong gateway URL for dark APIs")
 	tps           = flag.Float64("tps", 10, "Target transactions per second")
 	duration      = flag.Duration("duration", 5*time.Minute, "How long to run the injector")
 	burstFraction = flag.Float64("burst", 0.2, "Fraction of time to burst at 2x TPS (0-1)")
@@ -82,6 +83,7 @@ func main() {
 
 	log.Printf("KongAir Traffic Injector")
 	log.Printf("Target: %s", *baseURL)
+	log.Printf("Kong Gateway: %s", *kongURL)
 	log.Printf("TPS: %.1f (burst: %.1fx on %.0f%% of time)", *tps, 2, *burstFraction*100)
 	log.Printf("Duration: %v", *duration)
 	log.Printf("Dark APIs: %v", *includeDark)
@@ -249,6 +251,54 @@ func getTrafficPatterns(includeDark bool) []TrafficPattern {
 				name:   "dark-seat-map",
 				weight: 0.02,
 				fn:     darkSeatMap,
+			},
+			// Seating service (port 5055)
+			TrafficPattern{
+				name:   "dark-seating-map",
+				weight: 0.04,
+				fn:     darkSeatingMap,
+			},
+			TrafficPattern{
+				name:   "dark-seat-availability",
+				weight: 0.03,
+				fn:     darkSeatAvailability,
+			},
+			// Operations service (port 5056)
+			TrafficPattern{
+				name:   "dark-flight-status",
+				weight: 0.05,
+				fn:     darkFlightStatus,
+			},
+			TrafficPattern{
+				name:   "dark-flight-crew",
+				weight: 0.02,
+				fn:     darkFlightCrew,
+			},
+			TrafficPattern{
+				name:   "dark-flight-gate",
+				weight: 0.02,
+				fn:     darkFlightGate,
+			},
+			// Ancillary service (port 5057)
+			TrafficPattern{
+				name:   "dark-booking-addons",
+				weight: 0.03,
+				fn:     darkBookingAddOns,
+			},
+			TrafficPattern{
+				name:   "dark-baggage-policy",
+				weight: 0.02,
+				fn:     darkBaggagePolicy,
+			},
+			TrafficPattern{
+				name:   "dark-flight-meals",
+				weight: 0.03,
+				fn:     darkFlightMeals,
+			},
+			TrafficPattern{
+				name:   "dark-meal-preferences",
+				weight: 0.02,
+				fn:     darkMealPreferences,
 			},
 		)
 	}
@@ -424,6 +474,174 @@ func darkSeatMap(client *http.Client, baseURL string) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+// Seating service dark endpoints (routed through Kong /seating)
+
+func darkSeatingMap(client *http.Client, baseURL string) error {
+	// /seating/flights/{flightId}/seatingMap (via Kong)
+	flightID := []string{"KA0924", "KA0925"}[rand.Intn(2)]
+	url := fmt.Sprintf("%s/seating/flights/%s/seatingMap", *kongURL, flightID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkSeatAvailability(client *http.Client, baseURL string) error {
+	// /seating/flights/{flightId}/seats (via Kong)
+	flightID := []string{"KA0924", "KA0925"}[rand.Intn(2)]
+	url := fmt.Sprintf("%s/seating/flights/%s/seats?available=%t", *kongURL, flightID, rand.Float64() > 0.5)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+// Operations service dark endpoints (routed through Kong /operations)
+
+func darkFlightStatus(client *http.Client, baseURL string) error {
+	// /operations/flights/{flightNum}/status (via Kong)
+	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
+	url := fmt.Sprintf("%s/operations/flights/%s/status", *kongURL, flightNum)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkFlightCrew(client *http.Client, baseURL string) error {
+	// /operations/flights/{flightNum}/crew (via Kong)
+	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
+	url := fmt.Sprintf("%s/operations/flights/%s/crew", *kongURL, flightNum)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkFlightGate(client *http.Client, baseURL string) error {
+	// /operations/flights/{flightNum}/gate (via Kong)
+	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
+	url := fmt.Sprintf("%s/operations/flights/%s/gate", *kongURL, flightNum)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+// Ancillary service dark endpoints (routed through Kong /ancillary)
+
+func darkBookingAddOns(client *http.Client, baseURL string) error {
+	// GET /ancillary/bookings/{bookingId}/add-ons (via Kong)
+	bookingID := "BK001"
+	url := fmt.Sprintf("%s/ancillary/bookings/%s/add-ons", *kongURL, bookingID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkBaggagePolicy(client *http.Client, baseURL string) error {
+	// GET /ancillary/routes/{routeId}/baggage-policy (via Kong)
+	routeID := "LHR-SFO"
+	url := fmt.Sprintf("%s/ancillary/routes/%s/baggage-policy", *kongURL, routeID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkFlightMeals(client *http.Client, baseURL string) error {
+	// GET /ancillary/flights/{flightId}/meals (via Kong)
+	flightID := "KA0924"
+	url := fmt.Sprintf("%s/ancillary/flights/%s/meals", *kongURL, flightID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
+	io.ReadAll(resp.Body)
+	return nil
+}
+
+func darkMealPreferences(client *http.Client, baseURL string) error {
+	// GET /ancillary/customer/{customerId}/meal-preferences (via Kong)
+	customerID := fmt.Sprintf("CUST%d", 1000+rand.Intn(9000))
+	url := fmt.Sprintf("%s/ancillary/customer/%s/meal-preferences", *kongURL, customerID)
+	resp, err := client.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
 
 	io.ReadAll(resp.Body)
 	return nil

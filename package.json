@@ -1,0 +1,22 @@
+{
+  "name": "kongair-apidocs-demo",
+  "version": "1.0.0",
+  "description": "KongAir - APIOps Demo for Helsinki (Act 1: Dark APIs, Act 2: Governance)",
+  "scripts": {
+    "lint:api": "spectral lint -r .spectral.yaml docs/openapi/*.yaml",
+    "lint:api:verbose": "spectral lint -r .spectral.yaml docs/openapi/*.yaml -o pretty",
+    "traffic-injector": "cd traffic-injector && npm run start",
+    "traffic-injector:burst": "cd traffic-injector && npm run run-burst",
+    "traffic-injector:light": "cd traffic-injector && npm run run-light"
+  },
+  "devDependencies": {
+    "@stoplight/spectral-cli": "^6.11.0"
+  },
+  "keywords": [
+    "apiops",
+    "governance",
+    "kong",
+    "openapi",
+    "spectral"
+  ]
+}

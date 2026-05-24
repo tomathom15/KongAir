@@ -1,0 +1,297 @@
+openapi: 3.0.0
+info:
+  title: KongAir Ancillary Services
+  version: 1.0.0
+  description: |
+    Ancillary services for booking add-ons, baggage policies, meals, and preferences (Dark API - Act 1).
+
+    ⚠️ NOTE: This service intentionally contains data inconsistencies that will be addressed in Act 2:
+    - Field naming: price vs cost vs pricing inconsistency
+    - Dietary options: array vs comma-separated string inconsistency
+    - Timestamp formats: Unix vs ISO 8601
+    - Field naming mixed: booking_id vs bookingID, type vs meal_type
+    - Error response structures vary significantly
+    - Nested vs flat error structures
+
+servers:
+  - url: http://localhost:5057
+    description: Local development
+
+paths:
+  /bookings/{bookingId}/add-ons:
+    get:
+      summary: Get add-ons for a booking
+      operationId: getBookingAddOns
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: BK001
+      responses:
+        '200':
+          description: Add-ons retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  bookingID:
+                    type: string
+                    description: Inconsistent casing (bookingID vs booking_id)
+                  extras:
+                    type: array
+                    description: Renamed from addOns
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                        type:
+                          type: string
+                        fromSeat:
+                          type: string
+                          description: camelCase
+                        to_seat:
+                          type: string
+                          description: snake_case (mixed in same object)
+                        price:
+                          type: number
+                          nullable: true
+                        cost:
+                          type: number
+                          nullable: true
+                          description: Alternative field name
+                        status:
+                          type: string
+                  totalPrice:
+                    type: number
+                  timestamp:
+                    type: string
+                    format: date-time
+        '404':
+          description: Booking not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  code:
+                    type: string
+                  description:
+                    type: string
+    post:
+      summary: Add new add-on to booking
+      operationId: addBookingAddOn
+      parameters:
+        - name: bookingId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: BK001
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                type:
+                  type: string
+                details:
+                  type: object
+      responses:
+        '201':
+          description: Add-on created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  addon_id:
+                    type: string
+                  confirmation_time:
+                    type: string
+                    format: date-time
+        '400':
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  invalid_request:
+                    type: boolean
+                  reason:
+                    type: string
+
+  /routes/{routeId}/baggage-policy:
+    get:
+      summary: Get baggage policy for a route
+      operationId: getBaggagePolicy
+      parameters:
+        - name: routeId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: LHR-SFO
+      responses:
+        '200':
+          description: Baggage policy retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  route:
+                    type: string
+                  policies:
+                    type: object
+                    properties:
+                      checked_baggage:
+                        type: object
+                        properties:
+                          allowance:
+                            type: integer
+                          weight_limit:
+                            type: integer
+                            description: kilograms
+                          excess_fee:
+                            type: number
+                      carry_on:
+                        type: object
+                        properties:
+                          count:
+                            type: integer
+                          dimensions:
+                            type: string
+                            description: American units (inches)
+                      updated_at:
+                        type: integer
+                        description: Unix timestamp
+        '404':
+          description: Policy not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: object
+                    properties:
+                      status:
+                        type: integer
+                      message:
+                        type: string
+                      timestamp:
+                        type: string
+                        format: date-time
+
+  /flights/{flightId}/meals:
+    get:
+      summary: Get meal options for a flight
+      operationId: getFlightMeals
+      parameters:
+        - name: flightId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: KA0924
+      responses:
+        '200':
+          description: Meal options retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  flight:
+                    type: string
+                  available_meals:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        type:
+                          type: string
+                          description: Normalized from meal_type or type
+                        options:
+                          oneOf:
+                            - type: array
+                              items:
+                                type: string
+                              description: Array format
+                            - type: string
+                              description: Comma-separated string format (inconsistent)
+                        cost:
+                          type: number
+                          description: Normalized from price, pricing, or cost
+                        available:
+                          type: integer
+                          description: Normalized from available_count or stock
+                  metadata:
+                    type: object
+                    properties:
+                      last_updated:
+                        type: string
+                        format: date-time
+                      last_updated_ms:
+                        type: integer
+                        description: Both ISO and Unix timestamp provided
+        '404':
+          description: Flight not found
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  msg:
+                    type: string
+                    description: Different field name (msg)
+
+  /customer/{customerId}/meal-preferences:
+    get:
+      summary: Get meal preferences for a customer
+      operationId: getMealPreferences
+      parameters:
+        - name: customerId
+          in: path
+          required: true
+          schema:
+            type: string
+          example: CUST1234
+      responses:
+        '200':
+          description: Meal preferences retrieved
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  customer_id:
+                    type: string
+                    description: snake_case
+                  mealPreferences:
+                    type: object
+                    description: camelCase (inconsistent with customer_id)
+                    properties:
+                      dietary:
+                        type: array
+                        items:
+                          type: string
+                      cuisine_preference:
+                        type: string
+                      special_requests:
+                        type: string
+                  preferences_updated_at:
+                    type: integer
+                    description: Unix timestamp
+                  sync_status:
+                    type: string
+                    description: Extra field not in other services

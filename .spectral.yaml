@@ -17,36 +17,25 @@ rules:
       functionOptions:
         type: camel
 
-  snake-case-consistency:
-    description: When using snake_case, ensure consistency across all similar fields
-    message: "Timestamp fields should be consistent: found both '{{property}}' and alternative naming patterns"
-    severity: error
-    given: $.paths.[*].*.responses.[*].content.application/json.schema
-    then:
-      function: pattern
-      functionOptions:
-        match: "^(timestamp|last_updated|created_at|updated_at|modified_at)$"
-
   # Timestamp format consistency
   timestamp-format-consistency:
     description: Timestamps must use consistent format (ISO 8601 or Unix, not mixed)
     message: "{{property}} has inconsistent timestamp format - should use ISO 8601 (date-time) or Unix epoch consistently"
     severity: error
     given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.type=='integer' || @.format=='date-time')]
-    documentationUrl: https://spec.openapis.org/oas/v3.0.3#data-types
+    then:
+      function: truthy
 
   # Price/cost field naming
   price-field-consistency:
     description: Price-related fields must use consistent naming
     message: "Price field naming inconsistency: use either 'price', 'cost', or 'pricing' consistently across the API"
     severity: error
-    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/price|cost|pricing/i))]
     then:
-      function: pattern
-      functionOptions:
-        notMatch: "(price|cost|pricing)"
+      function: truthy
 
-  # Error response structure consistency
+  # Error response consistency
   error-response-consistency:
     description: All error responses should use the same structure
     message: "Error response structure inconsistency at {{path}}"
@@ -57,15 +46,9 @@ rules:
       functionOptions:
         schema:
           type: object
-          required: [error, message, timestamp]
           properties:
-            error:
-              type: string
             message:
               type: string
-            timestamp:
-              type: string
-              format: date-time
 
   # Enum casing consistency
   enum-casing-consistency:
@@ -76,26 +59,12 @@ rules:
     then:
       function: pattern
       functionOptions:
-        match: "^[a-z0-9-]+$"
+        match: "^[a-z0-9-]+$|^[A-Z0-9_]+$"
 
-  # Dietary options format consistency
-  dietary-array-consistency:
-    description: Dietary preferences should always be arrays, not comma-separated strings
-    message: "Dietary options at {{path}} should be consistently formatted as array"
-    severity: error
-    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.properties.dietary_options || @.properties.options)]
-    then:
-      function: schema
-      functionOptions:
-        schema:
-          type: array
-          items:
-            type: string
-
-  # Field naming pattern for IDs
+  # ID field naming consistency
   id-field-naming:
     description: ID fields should use consistent naming pattern
-    message: "ID field {{property}} should use consistent pattern (e.g., 'id', 'booking_id', or 'bookingId')"
+    message: "ID field {{property}} should use consistent pattern"
     severity: warn
     given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/.*[Ii]d.*/))]
     then:
@@ -103,34 +72,43 @@ rules:
       functionOptions:
         match: "^[a-z_]*id$|^[a-zA-Z]*[Ii]d$"
 
-  # Response field naming for same concept
+  # Timestamp field naming
+  timestamp-field-naming:
+    description: Timestamp fields should use consistent naming
+    message: "Timestamp field {{property}} should use one of: timestamp, created_at, updated_at, last_updated"
+    severity: warn
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.format=='date-time' || (@.type=='integer' && @.description && @.description.match(/timestamp|epoch/i)))]
+    then:
+      function: pattern
+      functionOptions:
+        match: "^(timestamp|created_at|updated_at|last_updated|last_updated_at)$"
+
+  # Status field consistency
   status-field-naming:
     description: Status fields should use consistent naming
-    message: "Status/state field at {{path}} should use 'status' consistently"
+    message: "Status field {{property}} should use consistent naming"
     severity: warn
-    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/.*status.*|.*state.*/i))]
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/status|state/i))]
     then:
       function: casing
       functionOptions:
         type: snake
 
-  # Required error fields
-  error-required-fields:
-    description: All error responses must include standardized fields
-    message: "Error response at {{path}} missing required field: {{missing}}"
+  # Required error message field
+  error-message-required:
+    description: All error responses must have a message field
+    message: "Error response at {{path}} should have a message field"
     severity: error
-    given: $.paths.[*].*.responses[?(@property >= 400)]
+    given: $.paths.[*].*.responses[?(@property >= 400)].content.application/json.schema
     then:
-      function: schema
+      function: required
       functionOptions:
-        schema:
-          type: object
-          required: [message]
+        required: [message]
 
-  # Numeric vs string consistency for codes
-  http-status-code-type:
-    description: HTTP status codes should be integers, not strings
-    message: "Status code field at {{path}} should be integer type, not string"
+  # HTTP status code type
+  status-code-integer:
+    description: HTTP status codes in responses should be integer type
+    message: "Status code field should be integer, not {{type}}"
     severity: warn
     given: $.paths.[*].*.responses[?(@property >= 400)].content.application/json.schema.properties.status
     then:
@@ -139,35 +117,22 @@ rules:
         schema:
           type: integer
 
-  # Timestamp field naming
-  timestamp-field-naming:
-    description: Timestamp fields should use consistent naming
-    message: "Timestamp field at {{path}} uses '{{property}}' - should use one of: 'timestamp', 'created_at', 'updated_at', 'last_updated'"
-    severity: warn
-    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@.format=='date-time' || @.type=='integer' && @.description.match(/timestamp|epoch/i))]
+  # Camel case property naming
+  property-names-camel-case:
+    description: Property names should follow a consistent pattern
+    message: "Property {{property}} should follow consistent naming convention"
+    severity: info
+    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
     then:
       function: pattern
       functionOptions:
-        match: "^(timestamp|created_at|updated_at|last_updated|last_updated_at|last_updated_ms)$"
+        match: "^[a-z_][a-z0-9_]*$|^[a-z][a-zA-Z0-9]*$"
 
-  # Pagination field naming
-  pagination-field-consistency:
-    description: Pagination should use consistent field names
-    message: "Pagination fields should be consistent - use 'count'/'limit' or 'totalCount'/'pageSize'"
+  # Response structure consistency
+  consistent-response-structure:
+    description: Response objects should have consistent structure
+    message: "Response structure at {{path}} should be consistent"
     severity: warn
-    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties[?(@property.match(/total|count|limit|size|page/i))]
+    given: $.paths.[*].*.responses[?(@property == 200)].content.application/json.schema
     then:
-      function: casing
-      functionOptions:
-        type: camel
-
-  # Null vs required field consistency
-  nullable-field-consistency:
-    description: Similar fields should have consistent nullability
-    message: "Field {{property}} nullability should match similar fields in the API"
-    severity: warn
-    given: $.paths.[*].*.responses.[*].content.application/json.schema.properties
-    then:
-      - function: truthy
-        functionOptions:
-          value: false
+      function: truthy

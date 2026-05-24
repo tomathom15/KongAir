@@ -18,6 +18,7 @@ import (
 
 var (
 	baseURL       = flag.String("url", "http://localhost:5052", "Base URL for KongAir APIs (flights service)")
+	kongURL       = flag.String("kong", "http://localhost:8000", "Kong gateway URL for dark APIs")
 	tps           = flag.Float64("tps", 10, "Target transactions per second")
 	duration      = flag.Duration("duration", 5*time.Minute, "How long to run the injector")
 	burstFraction = flag.Float64("burst", 0.2, "Fraction of time to burst at 2x TPS (0-1)")
@@ -82,6 +83,7 @@ func main() {
 
 	log.Printf("KongAir Traffic Injector")
 	log.Printf("Target: %s", *baseURL)
+	log.Printf("Kong Gateway: %s", *kongURL)
 	log.Printf("TPS: %.1f (burst: %.1fx on %.0f%% of time)", *tps, 2, *burstFraction*100)
 	log.Printf("Duration: %v", *duration)
 	log.Printf("Dark APIs: %v", *includeDark)
@@ -477,13 +479,12 @@ func darkSeatMap(client *http.Client, baseURL string) error {
 	return nil
 }
 
-// Seating service dark endpoints (port 5055)
+// Seating service dark endpoints (routed through Kong /seating)
 
 func darkSeatingMap(client *http.Client, baseURL string) error {
-	// /flights/{flightId}/seatingMap
-	seatURL := "http://localhost:5055"
+	// /seating/flights/{flightId}/seatingMap (via Kong)
 	flightID := []string{"KA0924", "KA0925"}[rand.Intn(2)]
-	url := fmt.Sprintf("%s/flights/%s/seatingMap", seatURL, flightID)
+	url := fmt.Sprintf("%s/seating/flights/%s/seatingMap", *kongURL, flightID)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -499,10 +500,9 @@ func darkSeatingMap(client *http.Client, baseURL string) error {
 }
 
 func darkSeatAvailability(client *http.Client, baseURL string) error {
-	// /flights/{flightId}/seats
-	seatURL := "http://localhost:5055"
+	// /seating/flights/{flightId}/seats (via Kong)
 	flightID := []string{"KA0924", "KA0925"}[rand.Intn(2)]
-	url := fmt.Sprintf("%s/flights/%s/seats?available=%t", seatURL, flightID, rand.Float64() > 0.5)
+	url := fmt.Sprintf("%s/seating/flights/%s/seats?available=%t", *kongURL, flightID, rand.Float64() > 0.5)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -517,13 +517,12 @@ func darkSeatAvailability(client *http.Client, baseURL string) error {
 	return nil
 }
 
-// Operations service dark endpoints (port 5056)
+// Operations service dark endpoints (routed through Kong /operations)
 
 func darkFlightStatus(client *http.Client, baseURL string) error {
-	// /flights/{flightNum}/status
-	opsURL := "http://localhost:5056"
+	// /operations/flights/{flightNum}/status (via Kong)
 	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
-	url := fmt.Sprintf("%s/flights/%s/status", opsURL, flightNum)
+	url := fmt.Sprintf("%s/operations/flights/%s/status", *kongURL, flightNum)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -539,10 +538,9 @@ func darkFlightStatus(client *http.Client, baseURL string) error {
 }
 
 func darkFlightCrew(client *http.Client, baseURL string) error {
-	// /flights/{flightNum}/crew
-	opsURL := "http://localhost:5056"
+	// /operations/flights/{flightNum}/crew (via Kong)
 	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
-	url := fmt.Sprintf("%s/flights/%s/crew", opsURL, flightNum)
+	url := fmt.Sprintf("%s/operations/flights/%s/crew", *kongURL, flightNum)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -558,10 +556,9 @@ func darkFlightCrew(client *http.Client, baseURL string) error {
 }
 
 func darkFlightGate(client *http.Client, baseURL string) error {
-	// /flights/{flightNum}/gate
-	opsURL := "http://localhost:5056"
+	// /operations/flights/{flightNum}/gate (via Kong)
 	flightNum := []string{"KA0924", "KA0925", "KA0926"}[rand.Intn(3)]
-	url := fmt.Sprintf("%s/flights/%s/gate", opsURL, flightNum)
+	url := fmt.Sprintf("%s/operations/flights/%s/gate", *kongURL, flightNum)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -576,13 +573,12 @@ func darkFlightGate(client *http.Client, baseURL string) error {
 	return nil
 }
 
-// Ancillary service dark endpoints (port 5057)
+// Ancillary service dark endpoints (routed through Kong /ancillary)
 
 func darkBookingAddOns(client *http.Client, baseURL string) error {
-	// GET /bookings/{bookingId}/add-ons
-	ancillaryURL := "http://localhost:5057"
+	// GET /ancillary/bookings/{bookingId}/add-ons (via Kong)
 	bookingID := "BK001"
-	url := fmt.Sprintf("%s/bookings/%s/add-ons", ancillaryURL, bookingID)
+	url := fmt.Sprintf("%s/ancillary/bookings/%s/add-ons", *kongURL, bookingID)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -598,10 +594,9 @@ func darkBookingAddOns(client *http.Client, baseURL string) error {
 }
 
 func darkBaggagePolicy(client *http.Client, baseURL string) error {
-	// GET /routes/{routeId}/baggage-policy
-	ancillaryURL := "http://localhost:5057"
+	// GET /ancillary/routes/{routeId}/baggage-policy (via Kong)
 	routeID := "LHR-SFO"
-	url := fmt.Sprintf("%s/routes/%s/baggage-policy", ancillaryURL, routeID)
+	url := fmt.Sprintf("%s/ancillary/routes/%s/baggage-policy", *kongURL, routeID)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -617,10 +612,9 @@ func darkBaggagePolicy(client *http.Client, baseURL string) error {
 }
 
 func darkFlightMeals(client *http.Client, baseURL string) error {
-	// GET /flights/{flightId}/meals
-	ancillaryURL := "http://localhost:5057"
+	// GET /ancillary/flights/{flightId}/meals (via Kong)
 	flightID := "KA0924"
-	url := fmt.Sprintf("%s/flights/%s/meals", ancillaryURL, flightID)
+	url := fmt.Sprintf("%s/ancillary/flights/%s/meals", *kongURL, flightID)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err
@@ -636,10 +630,9 @@ func darkFlightMeals(client *http.Client, baseURL string) error {
 }
 
 func darkMealPreferences(client *http.Client, baseURL string) error {
-	// GET /customer/{customerId}/meal-preferences
-	ancillaryURL := "http://localhost:5057"
+	// GET /ancillary/customer/{customerId}/meal-preferences (via Kong)
 	customerID := fmt.Sprintf("CUST%d", 1000+rand.Intn(9000))
-	url := fmt.Sprintf("%s/customer/%s/meal-preferences", ancillaryURL, customerID)
+	url := fmt.Sprintf("%s/ancillary/customer/%s/meal-preferences", *kongURL, customerID)
 	resp, err := client.Get(url)
 	if err != nil {
 		return err

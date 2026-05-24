@@ -104,3 +104,25 @@ services:
    - 5057:5057
   environment:
     - PORT=5057
+
+ kongair-traffic-injector:
+  build:
+    context: ./traffic-injector
+    dockerfile: Dockerfile
+  platform: linux/arm64
+  container_name: kongair-traffic-injector
+  hostname: traffic-injector.kongair
+  restart: on-failure
+  networks:
+    - kong-edu-net
+  depends_on:
+    - kongair-flights
+    - kongair-seating
+    - kongair-operations
+    - kongair-ancillary
+  environment:
+    - BASE_URL=http://flights.kongair:8080
+    - KONG_URL=http://localhost:8000
+    - TPS=10
+    - DURATION=5m
+    - DARK=true

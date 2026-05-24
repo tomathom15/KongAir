@@ -1,6 +1,6 @@
 networks:
-  kong-edu-net:
-    name: kong-edu-net
+  kongair-net:
+    name: kongair-net
     driver: bridge
     external: false
 
@@ -12,7 +12,7 @@ services:
   hostname: experience.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5050:4000
 
@@ -23,7 +23,7 @@ services:
   hostname: customers.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5051:3000
 
@@ -34,7 +34,7 @@ services:
   hostname: flights.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5052:8080
 
@@ -45,7 +45,7 @@ services:
   hostname: routes.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5053:8080
 
@@ -56,7 +56,7 @@ services:
   hostname: bookings.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5054:3000
 
@@ -69,7 +69,7 @@ services:
   hostname: seating.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5055:5055
   environment:
@@ -84,7 +84,7 @@ services:
   hostname: operations.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5056:5056
   environment:
@@ -99,7 +99,7 @@ services:
   hostname: ancillary.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
    - 5057:5057
   environment:
@@ -112,20 +112,16 @@ services:
   hostname: kong.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   ports:
     - 8000:8000
     - 8001:8001
   environment:
-    - KONG_DATABASE=off
-    - KONG_DECLARATIVE_CONFIG=/etc/kong/kong-local.yaml
     - KONG_PROXY_ACCESS_LOG=/dev/stdout
     - KONG_ADMIN_ACCESS_LOG=/dev/stdout
     - KONG_PROXY_ERROR_LOG=/dev/stderr
     - KONG_ADMIN_ERROR_LOG=/dev/stderr
     - KONG_LOG_LEVEL=notice
-  volumes:
-    - ./infrastructure/kong/kong-local.yaml:/etc/kong/kong-local.yaml:ro
   depends_on:
     - kongair-seating
     - kongair-operations
@@ -140,7 +136,7 @@ services:
   hostname: traffic-injector.kongair
   restart: on-failure
   networks:
-    - kong-edu-net
+    - kongair-net
   depends_on:
     - kong
     - kongair-flights

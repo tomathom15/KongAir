@@ -1,5 +1,8 @@
 .DS_Store
 .vscode/
+.env
+.env.local
+*.tfvars
 go-apiops*/
 deck-*/
 kong-quickstart.*

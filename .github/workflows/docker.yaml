@@ -4,9 +4,11 @@ on:
   push:
     branches:
       - "main"
-    paths-ignore:
-      - 'PRD/**'
-      - 'platform/kong/.generated/kong.yaml'
+      - "act2-standardized-services"
+    paths:
+      - 'services/**'
+      - 'traffic-injector/**'
+      - '.github/workflows/docker.yaml'
   workflow_dispatch:
 
 jobs:
@@ -15,16 +17,24 @@ jobs:
     strategy:
       matrix:
         app:
-          - dir: flight-data
+          - dir: services/flight-data
             name: flights
-          - dir: flight-data
+          - dir: services/flight-data
             name: routes
-          - dir: sales
+          - dir: services/sales
             name: bookings
-          - dir: sales
+          - dir: services/sales
             name: customer
-          - dir: .
+          - dir: services/experience
             name: experience
+          - dir: services/seating
+            name: seating
+          - dir: services/operations
+            name: operations
+          - dir: services/ancillary
+            name: ancillary
+          - dir: traffic-injector
+            name: traffic-injector
     steps:
       - name: Checkout
         uses: actions/checkout@v3
@@ -32,7 +42,7 @@ jobs:
         uses: docker/setup-qemu-action@v2
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v2
-      - name: Login to Docker Hub
+      - name: Login to GHCR
         uses: docker/login-action@v2
         with:
           registry: ghcr.io
@@ -41,7 +51,7 @@ jobs:
       - name: Build and push
         uses: docker/build-push-action@v4
         with:
-          context: "${{ matrix.app.dir }}/${{ matrix.app.name }}"
+          context: "${{ matrix.app.dir }}"
           push: true
           platforms: linux/amd64,linux/arm64
-          tags: ghcr.io/${{ github.actor }}/kongair-${{ matrix.app.name }}:latest
+          tags: ghcr.io/${{ github.repository }}/kongair-${{ matrix.app.name }}:latest

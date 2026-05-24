@@ -1,12 +1,12 @@
-name: Deploy Kong changes to PRD
+name: Deploy Kong changes to Konnect
 
 on:
   push:
     branches:
       - main
     paths:
-      - PRD/kong/kong.yaml
-      - .github/workflows/deploy-kong-PRD.yaml
+      - 'infrastructure/kong/**'
+      - '.github/workflows/deploy-kong-PRD.yaml'
   workflow_dispatch:
 
 jobs:

@@ -8,75 +8,81 @@ app.use(bodyParser.json());
 
 const PORT = process.env.PORT || 5057;
 
-// Mock ancillary data - with intentional inconsistencies
+// Mock ancillary data - standardized format
 const bookingAddOns = {
   'BK001': {
-    booking_id: 'BK001', // snake_case
-    ticketNumber: 'TK001', // camelCase (mix!)
-    flightNum: 'KA0924', // abbreviated
+    booking_id: 'BK001',
+    flight_id: 'KA0924',
     passenger_name: 'John Doe',
-    addOns: [ // camelCase
+    add_ons: [
       {
         id: 'ADDON001',
         type: 'seat_upgrade',
-        fromSeat: '32B', // camelCase
-        to_seat: '12A', // snake_case (mixed in same object!)
+        from_seat: '32B',
+        to_seat: '12A',
         price: 149.99,
-        status: 'confirmed'
-        // Missing standard fields like created_at
+        status: 'confirmed',
+        created_at: '2024-03-20T09:00:00Z',
+        updated_at: '2024-03-20T09:12:28Z'
       },
       {
         id: 'ADDON002',
         type: 'baggage',
         quantity: 1,
         weight: 23,
-        cost: 50.00 // "cost" not "price"
+        price: 50.00,
+        status: 'confirmed',
+        created_at: '2024-03-20T09:05:00Z',
+        updated_at: '2024-03-20T09:12:28Z'
       }
-    ]
+    ],
+    created_at: '2024-03-20T09:00:00Z',
+    updated_at: '2024-03-20T09:12:28Z'
   }
 };
 
 const baggagePolicies = {
   'LHR-SFO': {
-    routeId: 'LHR-SFO', // camelCase
+    route_id: 'LHR-SFO',
     origin: 'LHR',
-    destination_code: 'SFO', // snake_case (mixed!)
+    destination: 'SFO',
     free_baggage_allowance: 1,
-    max_weight_per_bag: 23, // kilograms
+    max_weight_per_bag: 23,
     carry_on_allowed: {
       count: 1,
-      dimensions: '22x14x9 inches' // American units (vs metric above!)
+      dimensions: '22x14x9'
     },
     excess_baggage_fee: 50.00,
-    last_updated: Date.now() // Unix timestamp (vs ISO elsewhere)
+    created_at: '2024-03-20T08:00:00Z',
+    updated_at: '2024-03-20T08:00:00Z'
   }
 };
 
 const mealOptions = {
   'KA0924': {
-    flight_id: 'KA0924', // snake_case
-    flightNumber: 'KA0924', // camelCase (redundant and inconsistent!)
+    flight_id: 'KA0924',
     meals: [
       {
         meal_type: 'breakfast',
-        dietary_options: ['vegan', 'gluten-free', 'halal'], // array
+        dietary_options: ['vegan', 'gluten-free', 'halal'],
         price: 12.00,
         available_count: 45
       },
       {
-        type: 'lunch', // "type" instead of "meal_type"!
-        options: 'vegan,vegetarian,standard', // comma-separated string (inconsistent with array above!)
-        pricing: 18.00, // "pricing" not "price"
-        stock: 120
+        meal_type: 'lunch',
+        dietary_options: ['vegan', 'vegetarian', 'standard'],
+        price: 18.00,
+        available_count: 120
       }
     ],
-    lastModified: '2024-03-20T08:00:00Z' // ISO 8601
+    created_at: '2024-03-20T08:00:00Z',
+    updated_at: '2024-03-20T08:00:00Z'
   }
 };
 
 // Health check
 app.get('/health', (req, res) => {
-  res.json({ ready: true }); // "ready" not "status" or "operational"
+  res.json({ status: 'ok' });
 });
 
 // GET add-ons for a booking
@@ -85,17 +91,19 @@ app.get('/bookings/:bookingId/add-ons', (req, res) => {
 
   if (!bookingAddOns[bookingId]) {
     return res.status(404).json({
-      code: 'NOT_FOUND',
-      description: `Booking ${bookingId} not found` // "description" field
+      error: 'Booking not found',
+      message: `Booking ${bookingId} not found`,
+      timestamp: new Date().toISOString()
     });
   }
 
   const data = bookingAddOns[bookingId];
   res.json({
-    bookingID: data.booking_id, // inconsistent casing (ID vs id)
-    extras: data.addOns, // "extras" instead of "addOns" or "add_ons"
-    totalPrice: data.addOns.reduce((sum, a) => sum + (a.price || a.cost || 0), 0),
-    timestamp: new Date().toISOString() // ISO 8601
+    booking_id: data.booking_id,
+    add_ons: data.add_ons,
+    total_price: data.add_ons.reduce((sum, a) => sum + (a.price || 0), 0),
+    created_at: data.created_at,
+    updated_at: data.updated_at
   });
 });
 
@@ -106,31 +114,38 @@ app.post('/bookings/:bookingId/add-ons', (req, res) => {
 
   if (!bookingId || !type) {
     return res.status(400).json({
-      invalid_request: true,
-      reason: 'Missing required fields' // different error structure again
+      error: 'Bad request',
+      message: 'Missing required fields',
+      timestamp: new Date().toISOString()
     });
   }
 
+  const now = new Date().toISOString();
   const addon = {
     id: `ADDON${Date.now()}`,
     type: type,
     ...details,
-    added_on: Date.now() // Unix timestamp
+    created_at: now,
+    updated_at: now
   };
 
   if (!bookingAddOns[bookingId]) {
     bookingAddOns[bookingId] = {
       booking_id: bookingId,
-      addOns: []
+      add_ons: [],
+      created_at: now,
+      updated_at: now
     };
   }
 
-  bookingAddOns[bookingId].addOns.push(addon);
+  bookingAddOns[bookingId].add_ons.push(addon);
+  bookingAddOns[bookingId].updated_at = now;
 
   res.status(201).json({
-    success: true,
-    addon_id: addon.id,
-    confirmation_time: new Date().toISOString() // ISO 8601
+    id: addon.id,
+    booking_id: bookingId,
+    created_at: now,
+    updated_at: now
   });
 });
 
@@ -140,70 +155,63 @@ app.get('/routes/:routeId/baggage-policy', (req, res) => {
 
   if (!baggagePolicies[routeId]) {
     return res.status(404).json({
-      error: {
-        status: 404,
-        message: `Policy for route ${routeId} not found`, // nested error
-        timestamp: new Date().toISOString()
-      }
+      error: 'Route not found',
+      message: `Policy for route ${routeId} not found`,
+      timestamp: new Date().toISOString()
     });
   }
 
   const policy = baggagePolicies[routeId];
   res.json({
-    route: routeId,
-    policies: {
-      checked_baggage: {
-        allowance: policy.free_baggage_allowance,
-        weight_limit: policy.max_weight_per_bag, // inconsistent field names
-        excess_fee: policy.excess_baggage_fee
-      },
-      carry_on: policy.carry_on_allowed,
-      updated_at: policy.last_updated // Unix timestamp (vs ISO 8601 elsewhere)
-    }
+    route_id: policy.route_id,
+    origin: policy.origin,
+    destination: policy.destination,
+    free_baggage_allowance: policy.free_baggage_allowance,
+    max_weight_per_bag: policy.max_weight_per_bag,
+    carry_on_allowed: policy.carry_on_allowed,
+    excess_baggage_fee: policy.excess_baggage_fee,
+    created_at: policy.created_at,
+    updated_at: policy.updated_at
   });
 });
 
-// GET meal options (different response structure)
+// GET meal options
 app.get('/flights/:flightId/meals', (req, res) => {
   const { flightId } = req.params;
 
   if (!mealOptions[flightId]) {
     return res.status(404).json({
-      msg: `No meals available for flight ${flightId}` // "msg" field (different from everything!)
+      error: 'Flight not found',
+      message: `No meals available for flight ${flightId}`,
+      timestamp: new Date().toISOString()
     });
   }
 
   const options = mealOptions[flightId];
   res.json({
-    flight: flightId,
-    available_meals: options.meals.map(meal => ({
-      type: meal.meal_type || meal.type, // handle both naming patterns
-      options: Array.isArray(meal.dietary_options)
-        ? meal.dietary_options
-        : meal.options.split(','), // normalize array
-      cost: meal.price || meal.pricing, // normalize price field
-      available: meal.available_count || meal.stock
+    flight_id: options.flight_id,
+    meals: options.meals.map(meal => ({
+      meal_type: meal.meal_type,
+      dietary_options: meal.dietary_options,
+      price: meal.price,
+      available_count: meal.available_count
     })),
-    metadata: {
-      last_updated: options.lastModified,
-      last_updated_ms: new Date(options.lastModified).getTime() // both formats!
-    }
+    created_at: options.created_at,
+    updated_at: options.updated_at
   });
 });
 
-// GET meal preferences (extends customer service inconsistently)
+// GET meal preferences
 app.get('/customer/:customerId/meal-preferences', (req, res) => {
   const { customerId } = req.params;
 
   res.json({
-    customer_id: customerId, // snake_case
-    mealPreferences: { // camelCase (mixed!)
-      dietary: ['vegetarian', 'nut-allergy'],
-      cuisine_preference: 'Asian', // mixed naming
-      special_requests: 'Aisle seat preferred' // inconsistent "special_requests" field
-    },
-    preferences_updated_at: Date.now(), // Unix
-    sync_status: 'pending' // extra field not in other services
+    customer_id: customerId,
+    dietary_options: ['vegetarian', 'nut-allergy'],
+    cuisine_preference: 'Asian',
+    special_requests: 'Aisle seat preferred',
+    created_at: new Date().toISOString(),
+    updated_at: new Date().toISOString()
   });
 });
 

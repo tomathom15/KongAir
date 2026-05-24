@@ -1,0 +1,30 @@
+_format_version: "1.0"
+
+services:
+  - host: seating.kongair
+    id: 7f2b6c9a-4e5d-4f8c-b2e1-9c8d7a1b6f5e
+    name: seating-service
+    path: /seating
+    port: 5055
+    protocol: http
+    routes:
+      - id: 8a3c7d9e-5f6e-4a9b-c3f2-0d9e8b1c7f6a
+        name: seating-service_get_seating_map
+        methods:
+          - GET
+        paths:
+          - /flights/*/seatingMap
+        protocols:
+          - http
+          - https
+        strip_path: true
+      - id: 9b4d8e0f-6a7f-5b0c-d4g3-1e0f9c2d8g7b
+        name: seating-service_get_seats
+        methods:
+          - GET
+        paths:
+          - /flights/*/seats
+        protocols:
+          - http
+          - https
+        strip_path: true

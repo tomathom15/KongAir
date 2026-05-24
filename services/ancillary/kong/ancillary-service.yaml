@@ -1,0 +1,60 @@
+_format_version: "1.0"
+
+services:
+  - host: ancillary.kongair
+    id: 2k7g1h3i-9d0i-8e3f-g7j6-4h3i2f5g1j0f
+    name: ancillary-service
+    path: /ancillary
+    port: 5057
+    protocol: http
+    routes:
+      - id: 3l8h2i4j-0e1j-9f4g-h8k7-5i4j3g6h2k1g
+        name: ancillary-service_get_addons
+        methods:
+          - GET
+        paths:
+          - /bookings/*/add-ons
+        protocols:
+          - http
+          - https
+        strip_path: true
+      - id: 4m9i3j5k-1f2k-0g5h-i9l8-6j5k4h7i3l2h
+        name: ancillary-service_post_addons
+        methods:
+          - POST
+        paths:
+          - /bookings/*/add-ons
+        protocols:
+          - http
+          - https
+        strip_path: true
+      - id: 5n0j4k6l-2g3l-1h6i-j0m9-7k6l5i8j4m3i
+        name: ancillary-service_get_baggage_policy
+        methods:
+          - GET
+        paths:
+          - /routes/*/baggage-policy
+        protocols:
+          - http
+          - https
+        strip_path: true
+      - id: 6o1k5l7m-3h4m-2i7j-k1n0-8l7m6j9k5n4j
+        name: ancillary-service_get_meals
+        methods:
+          - GET
+        paths:
+          - /flights/*/meals
+        protocols:
+          - http
+          - https
+        strip_path: true
+      - id: 7p2l6m8n-4i5n-3j8k-l2o1-9m8n7k0l6o5k
+        name: ancillary-service_get_meal_preferences
+        methods:
+          - GET
+        paths:
+          - /customer/*/meal-preferences
+        protocols:
+          - http
+          - https
+        strip_path: true

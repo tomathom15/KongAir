@@ -1,0 +1,40 @@
+_format_version: "1.0"
+
+services:
+  - host: operations.kongair
+    id: 8g3c7d9e-5f6e-4a9b-c3f2-0d9e8b1c7f6e
+    name: operations-service
+    path: /operations
+    port: 5056
+    protocol: http
+    routes:
+      - id: 9h4d8e0f-6a7f-5b0c-d4g3-1e0f9c2d8g7c
+        name: operations-service_get_status
+        methods:
+          - GET
+        paths:
+          - /flights/*/status
+        protocols:
+          - http
+          - https
+        strip_path: true
+      - id: 0i5e9f1g-7b8g-6c1d-e5h4-2f1g0d3e9h8d
+        name: operations-service_get_crew
+        methods:
+          - GET
+        paths:
+          - /flights/*/crew
+        protocols:
+          - http
+          - https
+        strip_path: true
+      - id: 1j6f0g2h-8c9h-7d2e-f6i5-3g2h1e4f0i9e
+        name: operations-service_get_gate
+        methods:
+          - GET
+        paths:
+          - /flights/*/gate
+        protocols:
+          - http
+          - https
+        strip_path: true

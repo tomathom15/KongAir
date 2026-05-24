@@ -122,7 +122,7 @@ services:
     - kongair-ancillary
   environment:
     - BASE_URL=http://flights.kongair:8080
-    - KONG_URL=http://localhost:8000
+    - KONG_URL=http://kong.kongair:8000
     - TPS=10
     - DURATION=5m
     - DARK=true

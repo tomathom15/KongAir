@@ -10,5 +10,7 @@ kong.env
 kong.yaml
 *.pid
 .hypothesis/
+node_modules/
+package-lock.json
 platform/terraform/.terraform.lock.hcl
 platform/terraform/.terraform/**

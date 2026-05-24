@@ -105,6 +105,32 @@ services:
   environment:
     - PORT=5057
 
+ kong:
+  image: kong:3.4-alpine
+  platform: linux/arm64
+  container_name: kong-gateway
+  hostname: kong.kongair
+  restart: on-failure
+  networks:
+    - kong-edu-net
+  ports:
+    - 8000:8000
+    - 8001:8001
+  environment:
+    - KONG_DATABASE=off
+    - KONG_DECLARATIVE_CONFIG=/etc/kong/kong-local.yaml
+    - KONG_PROXY_ACCESS_LOG=/dev/stdout
+    - KONG_ADMIN_ACCESS_LOG=/dev/stdout
+    - KONG_PROXY_ERROR_LOG=/dev/stderr
+    - KONG_ADMIN_ERROR_LOG=/dev/stderr
+    - KONG_LOG_LEVEL=notice
+  volumes:
+    - ./infrastructure/kong/kong-local.yaml:/etc/kong/kong-local.yaml:ro
+  depends_on:
+    - kongair-seating
+    - kongair-operations
+    - kongair-ancillary
+
  kongair-traffic-injector:
   build:
     context: ./traffic-injector
@@ -116,6 +142,7 @@ services:
   networks:
     - kong-edu-net
   depends_on:
+    - kong
     - kongair-flights
     - kongair-seating
     - kongair-operations

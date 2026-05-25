@@ -18,15 +18,12 @@ variable "konnect_pat" {
   description = "Konnect Personal Access Token"
 }
 
-# Act 1 Control Plane — Base Paths Only
-# Reference existing control plane configured with documented base paths only
-# Dark APIs remain hidden/undiscovered
-
-data "konnect_gateway_control_plane" "act1" {
-  name = "APIOpsHelsinki_US_Act1"
+variable "control_plane_id" {
+  type        = string
+  description = "Konnect Control Plane ID for Act 1 (APIOpsHelsinki_US_Act1)"
 }
 
 output "control_plane_id" {
-  value       = data.konnect_gateway_control_plane.act1.id
+  value       = var.control_plane_id
   description = "Control plane ID for services and routes"
 }

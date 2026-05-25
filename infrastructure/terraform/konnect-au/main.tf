@@ -18,15 +18,12 @@ variable "konnect_pat" {
   description = "Konnect Personal Access Token"
 }
 
-# Act 2 Control Plane — Full Documentation + Governance
-# Reference existing control plane with all APIs documented including previously dark endpoints
-# Ready for governance policies (rate limiting, auth, request validation)
-
-data "konnect_gateway_control_plane" "act2" {
-  name = "APIOpsHelsinki_AU_Act2"
+variable "control_plane_id" {
+  type        = string
+  description = "Konnect Control Plane ID for Act 2 (APIOpsHelsinki_AU_Act2)"
 }
 
 output "control_plane_id" {
-  value       = data.konnect_gateway_control_plane.act2.id
+  value       = var.control_plane_id
   description = "Control plane ID for services and routes"
 }

@@ -14,6 +14,7 @@ node_modules/
 package-lock.json
 platform/terraform/.terraform.lock.hcl
 platform/terraform/.terraform/**
+infrastructure/terraform/.env.tfvars
 infrastructure/terraform/.terraform.lock.hcl
 infrastructure/terraform/**/.terraform/**
 infrastructure/terraform/**/.terraform.lock.hcl

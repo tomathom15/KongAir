@@ -25,6 +25,7 @@ Before running the demo, ensure you have:
 - **Insomnia** or similar API client (free tier is fine)
 - **Kong account** with Konnect access (free tier available)
 - The KongAir repository cloned locally
+- **GitHub Actions Runner** (if using local runner): Make sure the ghactions-runner container is running and the `./run.sh` script is executing. See [actions-runner-setup.md](../docs/actions-runner-setup.md) for setup instructions. Without the runner, GitHub Actions workflows will not execute locally.
 
 ## Part 1: Understanding the Architecture
 

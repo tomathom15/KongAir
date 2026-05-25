@@ -99,24 +99,19 @@ Now run the configuration with your GitHub token:
 
 **Important:** When prompted for the runner name, use something meaningful like `orbstack-runner-01`.
 
-### 7. Install and run the service
+### 7. Start the runner
 
-Exit back to root, then install and start the runner service:
+As root, navigate to the runner directory and start it:
 
 ```bash
 exit  # back to root user
 
 cd /home/ghactions-runner/actions-runner
 
-./svc.sh install
-./svc.sh start
+./run.sh
 ```
 
-Verify it's running:
-
-```bash
-systemctl status actions-runner
-```
+The runner will start and display output showing it's listening for jobs. Keep this running in the foreground while you use it. The runner will remain active as long as the container is running.
 
 ### 8. Verify on GitHub
 

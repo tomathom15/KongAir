@@ -28,7 +28,9 @@ This compiles to a binary: `./kongair-injector`
 
 ## Running the Injector
 
-### Option 1: Light Traffic (Quick Test)
+### Against Direct Backends
+
+#### Option 1: Light Traffic (Quick Test)
 For testing with minimal load:
 
 ```bash
@@ -37,8 +39,9 @@ make run-light
 
 - 5 TPS for 2 minutes
 - Good for verifying the setup works
+- Targets flights service directly
 
-### Option 2: Standard Traffic (Act 1 Demo)
+#### Option 2: Standard Traffic (Act 1 Demo)
 For the main demo with realistic patterns:
 
 ```bash
@@ -49,21 +52,9 @@ make run-burst
 - Runs for 5 minutes
 - Includes dark API endpoints (30% of traffic)
 - Perfect for showing traffic patterns
+- Targets flights service directly
 
-### Option 3: Continuous Traffic (Background)
-For long-running traffic generation:
-
-```bash
-./kongair-injector \
-  -url http://localhost:5052 \
-  -tps 10 \
-  -duration 1h \
-  -dark=true &
-```
-
-Runs for 1 hour in the background.
-
-### Option 4: Verbose Mode (Debugging)
+#### Option 3: Verbose Mode (Debugging)
 To see every request:
 
 ```bash
@@ -71,6 +62,60 @@ make run-verbose
 ```
 
 Shows success/failure for each request.
+
+### Against Kong Gateways (APIOps Helsinki)
+
+For multi-region demo with US and AU Kong instances:
+
+#### US Gateway
+Standard traffic:
+```bash
+make run-us
+```
+
+- 15 TPS average with bursts to 20 TPS
+- 5 minute duration
+- Targets: `kong-apiops-helsinki-us.orb.local:8000`
+
+Heavy traffic:
+```bash
+make run-us-burst
+```
+
+- 20 TPS average with bursts to 40 TPS
+- 10 minute duration
+- For stress testing governance policies
+
+#### AU Gateway
+Standard traffic:
+```bash
+make run-au
+```
+
+- 15 TPS average with bursts to 20 TPS
+- 5 minute duration
+- Targets: `kong-apiops-helsinki-au.orb.local:8000`
+
+Heavy traffic:
+```bash
+make run-au-burst
+```
+
+- 20 TPS average with bursts to 40 TPS
+- 10 minute duration
+- For stress testing governance policies
+
+### Custom Targets
+
+To target any URL (direct backend, Kong gateway, or other):
+
+```bash
+./kongair-injector \
+  -url http://your-gateway.local:8000 \
+  -tps 10 \
+  -duration 5m \
+  -dark=true &
+```
 
 ## Traffic Distribution
 

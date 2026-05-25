@@ -345,8 +345,7 @@ func getFlightDetails(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	// Accept 200 or 404 (not all flight IDs exist)
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -382,7 +381,7 @@ func getCustomer(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -407,7 +406,7 @@ func bookFlight(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 201 && resp.StatusCode != 400 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -426,7 +425,7 @@ func checkBookingStatus(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -446,7 +445,10 @@ func darkFlightSearch(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	// This endpoint may or may not exist, both are acceptable
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
 	io.ReadAll(resp.Body)
 	return nil
 }
@@ -461,6 +463,10 @@ func darkFlightHistory(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
+
 	io.ReadAll(resp.Body)
 	return nil
 }
@@ -474,6 +480,10 @@ func darkSeatMap(client *http.Client, baseURL string) error {
 		return err
 	}
 	defer resp.Body.Close()
+
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
+		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
+	}
 
 	io.ReadAll(resp.Body)
 	return nil
@@ -491,7 +501,7 @@ func darkSeatingMap(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -509,7 +519,7 @@ func darkSeatAvailability(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -529,7 +539,7 @@ func darkFlightStatus(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -547,7 +557,7 @@ func darkFlightCrew(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -565,7 +575,7 @@ func darkFlightGate(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -585,7 +595,7 @@ func darkBookingAddOns(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -603,7 +613,7 @@ func darkBaggagePolicy(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -621,7 +631,7 @@ func darkFlightMeals(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 
@@ -639,7 +649,7 @@ func darkMealPreferences(client *http.Client, baseURL string) error {
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != 200 && resp.StatusCode != 404 {
+	if resp.StatusCode < 200 || resp.StatusCode >= 300 {
 		return fmt.Errorf("unexpected status: %d", resp.StatusCode)
 	}
 

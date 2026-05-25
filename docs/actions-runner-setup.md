@@ -55,13 +55,13 @@ GitHub Actions runner requires running as a non-root user for security:
 
 ```bash
 # Create dedicated user
-useradd -m -s /bin/bash github-runner
+useradd -m -s /bin/bash ghactions-runner
 
 # Give ownership of the directory
-chown -R github-runner:github-runner ~/actions-runner
+chown -R ghactions-runner:ghactions-runner ~/actions-runner
 
 # Switch to the new user
-su - github-runner
+su - ghactions-runner
 
 # Navigate to runner directory
 cd ~/actions-runner

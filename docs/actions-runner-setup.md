@@ -32,10 +32,10 @@ GitHub will provide a download token and setup commands — you'll use these nex
 
 ### 2. Create a container in OrbStack and install dependencies
 
-From your Mac, create and enter a container in OrbStack:
+From your Mac, create and enter a container in OrbStack using Ubuntu 22.04 (Jammy) for better package support:
 
 ```bash
-docker run --rm -it ubuntu:latest bash
+docker run --rm -it ubuntu:22.04 bash
 ```
 
 Once inside the container, install required dependencies:

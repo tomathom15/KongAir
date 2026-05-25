@@ -30,30 +30,26 @@ Choose **Linux** and **ARM64** (OrbStack runs on ARM).
 
 GitHub will provide a download token and setup commands — you'll use these next.
 
-### 2. Access OrbStack's Linux VM
+### 2. Create a container in OrbStack
 
-SSH into OrbStack from your Mac:
+From your Mac, create and enter a container in OrbStack:
 
 ```bash
-ssh orbstack@orbstack.local
-# or
-ssh orbstack@localhost
+docker run --rm -it ubuntu:latest bash
 ```
 
-### 3. Create a runner directory and install dependencies
-
-Inside OrbStack, create the runner directory and install required tools:
+Once inside the container, create the runner directory and install dependencies:
 
 ```bash
 mkdir -p ~/actions-runner
 cd ~/actions-runner
 
-# Install curl and other dependencies
+# Install required dependencies
 apt-get update
 apt-get install -y curl git jq libicu70
 ```
 
-### 4. Create a non-root user for the runner
+### 3. Create a non-root user for the runner
 
 GitHub Actions runner requires running as a non-root user for security:
 
@@ -71,7 +67,7 @@ su - github-runner
 cd ~/actions-runner
 ```
 
-### 5. Download and configure the runner
+### 4. Download and configure the runner
 
 Run the configuration with your GitHub token (obtained from step 1):
 
@@ -85,7 +81,7 @@ tar xzf ./actions-runner-linux-arm64-x.x.x.tar.gz
 
 **Important:** When prompted for the runner name, use something meaningful like `orbstack-runner-01`.
 
-### 6. Install and run the service
+### 5. Install and run the service
 
 Exit back to root, then install and start the runner service:
 
@@ -104,7 +100,7 @@ Verify it's running:
 systemctl status actions-runner
 ```
 
-### 7. Verify on GitHub
+### 6. Verify on GitHub
 
 Go back to:
 ```

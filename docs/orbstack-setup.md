@@ -10,6 +10,20 @@ This guide walks through setting up the KongAir backend services on **OrbStack**
 - **Docker Compose** (included with OrbStack)
 - This repository cloned locally
 
+### Clone the Repository
+
+If you haven't already cloned the KongAir repository, do so now:
+
+```bash
+# Clone from your fork (recommended for the demo)
+git clone https://github.com/tomathom15/KongAir.git
+
+# Or clone from the main repository
+git clone https://github.com/gwen-kong/KongAir.git
+
+cd KongAir
+```
+
 ## Quick Start
 
 ### 1. Start all backends

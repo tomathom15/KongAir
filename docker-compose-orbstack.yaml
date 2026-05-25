@@ -6,7 +6,9 @@ networks:
 
 services:
  kongair-experience:
-  image: kongedu/kongair-experience:1.0
+  build:
+    context: ./services/experience
+    dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-experience
   hostname: experience.kongair
@@ -17,7 +19,9 @@ services:
    - 5050:4000
 
  kongair-customers:
-  image: kongedu/kongair-customers:1.0
+  build:
+    context: ./services/sales/customer
+    dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-customers
   hostname: customers.kongair
@@ -28,7 +32,9 @@ services:
    - 5051:3000
 
  kongair-flights:
-  image: kongedu/kongair-flights:1.0
+  build:
+    context: ./services/flight-data/flights
+    dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-flights
   hostname: flights.kongair
@@ -39,7 +45,9 @@ services:
    - 5052:8080
 
  kongair-routes:
-  image: kongedu/kongair-routes:1.0
+  build:
+    context: ./services/flight-data/routes
+    dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-routes
   hostname: routes.kongair
@@ -50,7 +58,9 @@ services:
    - 5053:8080
 
  kongair-bookings:
-  image: kongedu/kongair-bookings:1.0
+  build:
+    context: ./services/sales/bookings
+    dockerfile: Dockerfile
   platform: linux/arm64
   container_name: kongair-bookings
   hostname: bookings.kongair

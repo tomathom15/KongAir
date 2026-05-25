@@ -30,26 +30,52 @@ Choose **Linux** and **ARM64** (OrbStack runs on ARM).
 
 GitHub will provide a download token and setup commands — you'll use these next.
 
-### 2. Create a directory in OrbStack
+### 2. Access OrbStack's Linux VM
 
-Inside OrbStack, create a dedicated directory for the runner:
+SSH into OrbStack from your Mac:
 
 ```bash
-# From your Mac, execute commands in OrbStack
-docker run --rm -it ubuntu:latest bash
-# (or use another approach to access OrbStack's Linux VM)
-
-mkdir -p ~/github-runner
-cd ~/github-runner
+ssh orbstack@orbstack.local
+# or
+ssh orbstack@localhost
 ```
 
-### 3. Download and configure the runner
+### 3. Create a runner directory and install dependencies
 
-Inside OrbStack, run the setup commands GitHub provides. They look like:
+Inside OrbStack, create the runner directory and install required tools:
 
 ```bash
-mkdir actions-runner && cd actions-runner
+mkdir -p ~/actions-runner
+cd ~/actions-runner
 
+# Install curl and other dependencies
+apt-get update
+apt-get install -y curl git jq libicu70
+```
+
+### 4. Create a non-root user for the runner
+
+GitHub Actions runner requires running as a non-root user for security:
+
+```bash
+# Create dedicated user
+useradd -m -s /bin/bash github-runner
+
+# Give ownership of the directory
+chown -R github-runner:github-runner ~/actions-runner
+
+# Switch to the new user
+su - github-runner
+
+# Navigate to runner directory
+cd ~/actions-runner
+```
+
+### 5. Download and configure the runner
+
+Run the configuration with your GitHub token (obtained from step 1):
+
+```bash
 curl -o actions-runner-linux-arm64-x.x.x.tar.gz -L https://github.com/actions/runner/releases/download/v.../actions-runner-linux-arm64-x.x.x.tar.gz
 
 tar xzf ./actions-runner-linux-arm64-x.x.x.tar.gz
@@ -57,22 +83,28 @@ tar xzf ./actions-runner-linux-arm64-x.x.x.tar.gz
 ./config.sh --url https://github.com/tomathom15/KongAir --token <TOKEN_FROM_GITHUB>
 ```
 
-**Important:** Register it with a meaningful name like `orbstack-runner-01`.
+**Important:** When prompted for the runner name, use something meaningful like `orbstack-runner-01`.
 
-### 4. Install and run the service
+### 6. Install and run the service
+
+Exit back to root, then install and start the runner service:
 
 ```bash
-sudo ./svc.sh install
-sudo ./svc.sh start
+exit  # back to root user
+
+cd ~/actions-runner
+
+./svc.sh install
+./svc.sh start
 ```
 
 Verify it's running:
 
 ```bash
-sudo systemctl status actions-runner
+systemctl status actions-runner
 ```
 
-### 5. Verify on GitHub
+### 7. Verify on GitHub
 
 Go back to:
 ```
@@ -103,8 +135,8 @@ The runner will stop if OrbStack restarts. To make it persist:
 
 1. **Option A (Simple):** Manual restart after OrbStack reboot
    ```bash
-   cd ~/github-runner/actions-runner
-   sudo ./svc.sh start
+   cd ~/actions-runner
+   ./svc.sh start
    ```
 
 2. **Option B (Automated):** Add to OrbStack's startup scripts (OrbStack-specific)
@@ -130,9 +162,9 @@ TBD: Document the exact persistent setup for OrbStack.
 ## Next Steps
 
 Once the runner is configured:
-1. Update the [APIOps pipeline workflow](.github/workflows/stage-changes-for-kong.yaml) to use the local runner
+1. Update GitHub Actions workflows to use the local runner by adding `runs-on: [self-hosted, orbstack]` or `runs-on: self-hosted`
 2. Test by triggering a workflow run
-3. Watch the pipeline execute locally as you demonstrate Act 1
+3. Watch the pipeline execute locally in OrbStack as you demonstrate Act 1
 
 ## Security Notes
 

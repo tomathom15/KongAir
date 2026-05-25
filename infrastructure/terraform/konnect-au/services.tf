@@ -1,6 +1,6 @@
-# Kong Services for Act 1 — Base Paths Only
-# All services are configured with base paths for documented APIs only
-# Dark APIs (undocumented sub-paths) remain invisible
+# Kong Services for Act 2 — Full Documentation with Governance
+# All services configured with complete path documentation
+# Dark APIs from Act 1 are now explicitly documented
 
 # Flights Service
 resource "konnect_gateway_service" "flights" {
@@ -9,7 +9,7 @@ resource "konnect_gateway_service" "flights" {
   port     = 5052
   protocol = "http"
 
-  tags = ["act1", "documented", "flight-data"]
+  tags = ["act2", "documented", "governed", "flight-data"]
 }
 
 # Routes Service
@@ -19,7 +19,7 @@ resource "konnect_gateway_service" "routes" {
   port     = 5053
   protocol = "http"
 
-  tags = ["act1", "documented", "flight-data"]
+  tags = ["act2", "documented", "governed", "flight-data"]
 }
 
 # Customers Service
@@ -29,7 +29,7 @@ resource "konnect_gateway_service" "customers" {
   port     = 5051
   protocol = "http"
 
-  tags = ["act1", "documented", "sales"]
+  tags = ["act2", "documented", "governed", "sales"]
 }
 
 # Bookings Service
@@ -39,7 +39,7 @@ resource "konnect_gateway_service" "bookings" {
   port     = 5054
   protocol = "http"
 
-  tags = ["act1", "documented", "sales"]
+  tags = ["act2", "documented", "governed", "sales"]
 }
 
 # Seating Service
@@ -49,7 +49,7 @@ resource "konnect_gateway_service" "seating" {
   port     = 5055
   protocol = "http"
 
-  tags = ["act1", "documented", "seating"]
+  tags = ["act2", "documented", "governed", "seating"]
 }
 
 # Operations Service
@@ -59,7 +59,7 @@ resource "konnect_gateway_service" "operations" {
   port     = 5056
   protocol = "http"
 
-  tags = ["act1", "documented", "operations"]
+  tags = ["act2", "documented", "governed", "operations"]
 }
 
 # Ancillary Service
@@ -69,7 +69,7 @@ resource "konnect_gateway_service" "ancillary" {
   port     = 5057
   protocol = "http"
 
-  tags = ["act1", "documented", "ancillary"]
+  tags = ["act2", "documented", "governed", "ancillary"]
 }
 
 # Experience Service
@@ -79,7 +79,7 @@ resource "konnect_gateway_service" "experience" {
   port     = 5050
   protocol = "http"
 
-  tags = ["act1", "documented", "experience"]
+  tags = ["act2", "documented", "governed", "experience"]
 }
 
 # Service ID outputs for use in routes

@@ -13,7 +13,7 @@ RUN ARCH=$(uname -m | sed 's/x86_64/amd64/' | sed 's/aarch64/arm64/') && \
 WORKDIR /usr/src/app
 COPY package*.json ./
 
-RUN npm ci --omit=dev
+RUN npm install --omit=dev
 
 COPY . .
 

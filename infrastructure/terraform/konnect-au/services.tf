@@ -6,7 +6,7 @@
 resource "konnect_gateway_service" "flights" {
   control_plane_id = var.control_plane_id
   name             = "flights-service"
-  host             = "kongair-flights.kongair.orb.local"
+  host             = "flights.kongair"
   port             = 5052
   protocol         = "http"
 
@@ -17,7 +17,7 @@ resource "konnect_gateway_service" "flights" {
 resource "konnect_gateway_service" "routes" {
   control_plane_id = var.control_plane_id
   name             = "routes-service"
-  host             = "kongair-routes.kongair.orb.local"
+  host             = "routes.kongair"
   port             = 5053
   protocol         = "http"
 
@@ -28,7 +28,7 @@ resource "konnect_gateway_service" "routes" {
 resource "konnect_gateway_service" "customers" {
   control_plane_id = var.control_plane_id
   name             = "customers-service"
-  host             = "kongair-customers.kongair.orb.local"
+  host             = "customers.kongair"
   port             = 5051
   protocol         = "http"
 
@@ -39,7 +39,7 @@ resource "konnect_gateway_service" "customers" {
 resource "konnect_gateway_service" "bookings" {
   control_plane_id = var.control_plane_id
   name             = "bookings-service"
-  host             = "kongair-bookings.kongair.orb.local"
+  host             = "bookings.kongair"
   port             = 5054
   protocol         = "http"
 
@@ -50,7 +50,7 @@ resource "konnect_gateway_service" "bookings" {
 resource "konnect_gateway_service" "seating" {
   control_plane_id = var.control_plane_id
   name             = "seating-service"
-  host             = "kongair-seating.kongair.orb.local"
+  host             = "seating.kongair"
   port             = 5055
   protocol         = "http"
 
@@ -61,7 +61,7 @@ resource "konnect_gateway_service" "seating" {
 resource "konnect_gateway_service" "operations" {
   control_plane_id = var.control_plane_id
   name             = "operations-service"
-  host             = "kongair-operations.kongair.orb.local"
+  host             = "operations.kongair"
   port             = 5056
   protocol         = "http"
 
@@ -72,7 +72,7 @@ resource "konnect_gateway_service" "operations" {
 resource "konnect_gateway_service" "ancillary" {
   control_plane_id = var.control_plane_id
   name             = "ancillary-service"
-  host             = "kongair-ancillary.kongair.orb.local"
+  host             = "ancillary.kongair"
   port             = 5057
   protocol         = "http"
 
@@ -83,7 +83,7 @@ resource "konnect_gateway_service" "ancillary" {
 resource "konnect_gateway_service" "experience" {
   control_plane_id = var.control_plane_id
   name             = "experience-service"
-  host             = "kongair-experience.kongair.orb.local"
+  host             = "experience.kongair"
   port             = 5050
   protocol         = "http"
 

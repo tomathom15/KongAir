@@ -12,19 +12,25 @@ provider "konnect" {
   server_url            = "https://au.api.konghq.com" # AU region
 }
 
-# Act 2 — Governance & Standards environment
-# This is pre-staged before the demo with full governance, Dev Portal, and standards enforcement
-# It's the "hero state" that can't be broken during Act 1's live demo
-
 variable "konnect_pat" {
   type        = string
   sensitive   = true
   description = "Konnect Personal Access Token"
 }
 
-# TBD: Define full governance setup:
-# - Konnect gateway and data planes
-# - All APIs fully documented
-# - Dev Portal configured
-# - Spectral rules enforced
-# - Standards applied via submodule reference
+# Act 2 Control Plane — Full Documentation + Governance
+# This control plane has all APIs documented including previously dark endpoints
+# Ready for governance policies (rate limiting, auth, request validation)
+
+resource "konnect_gateway_control_plane" "act2" {
+  name         = "KongAir Act 2"
+  description  = "Act 2: Full Documentation + Governance (Dark APIs Now Documented)"
+  cluster_type = "CLUSTER_TYPE_CONTROL_PLANE"
+  auth_type    = "pinned_client_certs"
+  cloud_gateway = true
+}
+
+output "control_plane_id" {
+  value       = konnect_gateway_control_plane.act2.id
+  description = "Control plane ID for services and routes"
+}

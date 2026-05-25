@@ -8,6 +8,7 @@
 
 # Documented base path
 resource "konnect_gateway_route" "flights_base" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "flights-base-route"
   paths = [
     "/flights"
@@ -22,6 +23,7 @@ resource "konnect_gateway_route" "flights_base" {
 
 # Dark API: Alternative search endpoint
 resource "konnect_gateway_route" "flights_search" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "flights-search-route"
   paths = [
     "/flights/search"
@@ -36,6 +38,7 @@ resource "konnect_gateway_route" "flights_search" {
 
 # Dark API: Flight history by customer
 resource "konnect_gateway_route" "flights_history" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "flights-history-route"
   paths = [
     "/flights/history/*"
@@ -50,6 +53,7 @@ resource "konnect_gateway_route" "flights_history" {
 
 # Dark API: Seat map queries
 resource "konnect_gateway_route" "flights_seats" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "flights-seats-route"
   paths = [
     "/flights/*/seats"
@@ -67,6 +71,7 @@ resource "konnect_gateway_route" "flights_seats" {
 # ============================================================================
 
 resource "konnect_gateway_route" "routes" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "routes-route"
   paths = [
     "/routes"
@@ -84,6 +89,7 @@ resource "konnect_gateway_route" "routes" {
 # ============================================================================
 
 resource "konnect_gateway_route" "customers" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "customers-route"
   paths = [
     "/customers"
@@ -101,6 +107,7 @@ resource "konnect_gateway_route" "customers" {
 # ============================================================================
 
 resource "konnect_gateway_route" "bookings" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "bookings-route"
   paths = [
     "/bookings"
@@ -119,6 +126,7 @@ resource "konnect_gateway_route" "bookings" {
 
 # Documented base path
 resource "konnect_gateway_route" "seating_base" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "seating-base-route"
   paths = [
     "/seating"
@@ -133,6 +141,7 @@ resource "konnect_gateway_route" "seating_base" {
 
 # Dark API: Seating map endpoint
 resource "konnect_gateway_route" "seating_map" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "seating-map-route"
   paths = [
     "/seating/flights/*/seatingMap"
@@ -147,6 +156,7 @@ resource "konnect_gateway_route" "seating_map" {
 
 # Dark API: Seat availability endpoint
 resource "konnect_gateway_route" "seating_seats" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "seating-seats-route"
   paths = [
     "/seating/flights/*/seats"
@@ -165,6 +175,7 @@ resource "konnect_gateway_route" "seating_seats" {
 
 # Documented base path
 resource "konnect_gateway_route" "operations_base" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "operations-base-route"
   paths = [
     "/operations"
@@ -179,6 +190,7 @@ resource "konnect_gateway_route" "operations_base" {
 
 # Dark API: Flight status endpoint
 resource "konnect_gateway_route" "operations_status" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "operations-status-route"
   paths = [
     "/operations/flights/*/status"
@@ -193,6 +205,7 @@ resource "konnect_gateway_route" "operations_status" {
 
 # Dark API: Flight crew endpoint
 resource "konnect_gateway_route" "operations_crew" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "operations-crew-route"
   paths = [
     "/operations/flights/*/crew"
@@ -207,6 +220,7 @@ resource "konnect_gateway_route" "operations_crew" {
 
 # Dark API: Flight gate endpoint
 resource "konnect_gateway_route" "operations_gate" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "operations-gate-route"
   paths = [
     "/operations/flights/*/gate"
@@ -225,6 +239,7 @@ resource "konnect_gateway_route" "operations_gate" {
 
 # Documented base path
 resource "konnect_gateway_route" "ancillary_base" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "ancillary-base-route"
   paths = [
     "/ancillary"
@@ -239,6 +254,7 @@ resource "konnect_gateway_route" "ancillary_base" {
 
 # Dark API: Booking add-ons endpoint
 resource "konnect_gateway_route" "ancillary_addons" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "ancillary-addons-route"
   paths = [
     "/ancillary/bookings/*/add-ons"
@@ -253,6 +269,7 @@ resource "konnect_gateway_route" "ancillary_addons" {
 
 # Dark API: Baggage policy endpoint
 resource "konnect_gateway_route" "ancillary_baggage" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "ancillary-baggage-route"
   paths = [
     "/ancillary/routes/*/baggage-policy"
@@ -267,6 +284,7 @@ resource "konnect_gateway_route" "ancillary_baggage" {
 
 # Dark API: Flight meals endpoint
 resource "konnect_gateway_route" "ancillary_meals" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "ancillary-meals-route"
   paths = [
     "/ancillary/flights/*/meals"
@@ -281,6 +299,7 @@ resource "konnect_gateway_route" "ancillary_meals" {
 
 # Dark API: Meal preferences endpoint
 resource "konnect_gateway_route" "ancillary_preferences" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "ancillary-preferences-route"
   paths = [
     "/ancillary/customer/*/meal-preferences"
@@ -298,6 +317,7 @@ resource "konnect_gateway_route" "ancillary_preferences" {
 # ============================================================================
 
 resource "konnect_gateway_route" "experience" {
+  control_plane_id = konnect_gateway_control_plane.act2.id
   name = "experience-route"
   paths = [
     "/experience"

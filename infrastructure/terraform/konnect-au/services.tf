@@ -4,80 +4,88 @@
 
 # Flights Service
 resource "konnect_gateway_service" "flights" {
-  name     = "flights-service"
-  host     = "flights.kongair"
-  port     = 5052
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "flights-service"
+  host             = "flights.kongair"
+  port             = 5052
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "flight-data"]
 }
 
 # Routes Service
 resource "konnect_gateway_service" "routes" {
-  name     = "routes-service"
-  host     = "routes.kongair"
-  port     = 5053
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "routes-service"
+  host             = "routes.kongair"
+  port             = 5053
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "flight-data"]
 }
 
 # Customers Service
 resource "konnect_gateway_service" "customers" {
-  name     = "customers-service"
-  host     = "customers.kongair"
-  port     = 5051
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "customers-service"
+  host             = "customers.kongair"
+  port             = 5051
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "sales"]
 }
 
 # Bookings Service
 resource "konnect_gateway_service" "bookings" {
-  name     = "bookings-service"
-  host     = "bookings.kongair"
-  port     = 5054
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "bookings-service"
+  host             = "bookings.kongair"
+  port             = 5054
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "sales"]
 }
 
 # Seating Service
 resource "konnect_gateway_service" "seating" {
-  name     = "seating-service"
-  host     = "seating.kongair"
-  port     = 5055
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "seating-service"
+  host             = "seating.kongair"
+  port             = 5055
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "seating"]
 }
 
 # Operations Service
 resource "konnect_gateway_service" "operations" {
-  name     = "operations-service"
-  host     = "operations.kongair"
-  port     = 5056
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "operations-service"
+  host             = "operations.kongair"
+  port             = 5056
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "operations"]
 }
 
 # Ancillary Service
 resource "konnect_gateway_service" "ancillary" {
-  name     = "ancillary-service"
-  host     = "ancillary.kongair"
-  port     = 5057
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "ancillary-service"
+  host             = "ancillary.kongair"
+  port             = 5057
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "ancillary"]
 }
 
 # Experience Service
 resource "konnect_gateway_service" "experience" {
-  name     = "experience-service"
-  host     = "experience.kongair"
-  port     = 5050
-  protocol = "http"
+  control_plane_id = konnect_gateway_control_plane.act2.id
+  name             = "experience-service"
+  host             = "experience.kongair"
+  port             = 5050
+  protocol         = "http"
 
   tags = ["act2", "documented", "governed", "experience"]
 }

@@ -4,7 +4,8 @@
 
 # Flights Service Route
 resource "konnect_gateway_route" "flights" {
-  name = "flights-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "flights-route"
   paths = [
     "/flights"
   ]
@@ -18,7 +19,8 @@ resource "konnect_gateway_route" "flights" {
 
 # Routes Service Route
 resource "konnect_gateway_route" "routes" {
-  name = "routes-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "routes-route"
   paths = [
     "/routes"
   ]
@@ -32,7 +34,8 @@ resource "konnect_gateway_route" "routes" {
 
 # Customers Service Route
 resource "konnect_gateway_route" "customers" {
-  name = "customers-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "customers-route"
   paths = [
     "/customers"
   ]
@@ -46,7 +49,8 @@ resource "konnect_gateway_route" "customers" {
 
 # Bookings Service Route
 resource "konnect_gateway_route" "bookings" {
-  name = "bookings-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "bookings-route"
   paths = [
     "/bookings"
   ]
@@ -60,7 +64,8 @@ resource "konnect_gateway_route" "bookings" {
 
 # Seating Service Route
 resource "konnect_gateway_route" "seating" {
-  name = "seating-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "seating-route"
   paths = [
     "/seating"
   ]
@@ -74,7 +79,8 @@ resource "konnect_gateway_route" "seating" {
 
 # Operations Service Route
 resource "konnect_gateway_route" "operations" {
-  name = "operations-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "operations-route"
   paths = [
     "/operations"
   ]
@@ -88,7 +94,8 @@ resource "konnect_gateway_route" "operations" {
 
 # Ancillary Service Route
 resource "konnect_gateway_route" "ancillary" {
-  name = "ancillary-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "ancillary-route"
   paths = [
     "/ancillary"
   ]
@@ -102,7 +109,8 @@ resource "konnect_gateway_route" "ancillary" {
 
 # Experience Service Route
 resource "konnect_gateway_route" "experience" {
-  name = "experience-route"
+  control_plane_id = konnect_gateway_control_plane.act1.id
+  name             = "experience-route"
   paths = [
     "/experience"
   ]

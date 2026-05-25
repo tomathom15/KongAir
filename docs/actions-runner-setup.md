@@ -42,7 +42,7 @@ Once inside the container, install required dependencies:
 
 ```bash
 apt-get update
-apt-get install -y curl git jq libicu70
+apt-get install -y curl git jq
 ```
 
 ### 3. Create a non-root user for the runner

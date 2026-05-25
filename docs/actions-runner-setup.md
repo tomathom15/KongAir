@@ -30,7 +30,7 @@ Choose **Linux** and **ARM64** (OrbStack runs on ARM).
 
 GitHub will provide a download token and setup commands — you'll use these next.
 
-### 2. Create a container in OrbStack
+### 2. Create a container in OrbStack and install dependencies
 
 From your Mac, create and enter a container in OrbStack:
 
@@ -38,13 +38,9 @@ From your Mac, create and enter a container in OrbStack:
 docker run --rm -it ubuntu:latest bash
 ```
 
-Once inside the container, create the runner directory and install dependencies:
+Once inside the container, install required dependencies:
 
 ```bash
-mkdir -p ~/actions-runner
-cd ~/actions-runner
-
-# Install required dependencies
 apt-get update
 apt-get install -y curl git jq libicu70
 ```
@@ -57,21 +53,18 @@ GitHub Actions runner requires running as a non-root user for security:
 # Create dedicated user
 useradd -m -s /bin/bash ghactions-runner
 
-# Give ownership of the directory
-chown -R ghactions-runner:ghactions-runner ~/actions-runner
-
 # Switch to the new user
 su - ghactions-runner
-
-# Navigate to runner directory
-cd ~/actions-runner
 ```
 
 ### 4. Download and configure the runner
 
-Run the configuration with your GitHub token (obtained from step 1):
+Create the runner directory and download/configure as the ghactions-runner user:
 
 ```bash
+mkdir -p ~/actions-runner
+cd ~/actions-runner
+
 curl -o actions-runner-linux-arm64-x.x.x.tar.gz -L https://github.com/actions/runner/releases/download/v.../actions-runner-linux-arm64-x.x.x.tar.gz
 
 tar xzf ./actions-runner-linux-arm64-x.x.x.tar.gz
@@ -88,7 +81,7 @@ Exit back to root, then install and start the runner service:
 ```bash
 exit  # back to root user
 
-cd ~/actions-runner
+cd /home/ghactions-runner/actions-runner
 
 ./svc.sh install
 ./svc.sh start
@@ -131,7 +124,7 @@ The runner will stop if OrbStack restarts. To make it persist:
 
 1. **Option A (Simple):** Manual restart after OrbStack reboot
    ```bash
-   cd ~/actions-runner
+   cd /home/ghactions-runner/actions-runner
    ./svc.sh start
    ```
 

@@ -59,7 +59,7 @@ su - ghactions-runner
 
 ### 4. Download and configure the runner
 
-Create the runner directory and download/configure as the ghactions-runner user:
+Create the runner directory and download as the ghactions-runner user:
 
 ```bash
 mkdir -p ~/actions-runner
@@ -68,13 +68,38 @@ cd ~/actions-runner
 curl -o actions-runner-linux-arm64-x.x.x.tar.gz -L https://github.com/actions/runner/releases/download/v.../actions-runner-linux-arm64-x.x.x.tar.gz
 
 tar xzf ./actions-runner-linux-arm64-x.x.x.tar.gz
+```
 
+### 5. Install .NET Core dependencies
+
+The runner uses .NET Core 6.0 which requires additional system libraries. Exit back to root and install them:
+
+```bash
+exit  # back to root user
+
+cd /home/ghactions-runner/actions-runner
+
+./bin/installdependencies.sh
+```
+
+Then switch back to ghactions-runner:
+
+```bash
+su - ghactions-runner
+cd ~/actions-runner
+```
+
+### 6. Configure the runner
+
+Now run the configuration with your GitHub token:
+
+```bash
 ./config.sh --url https://github.com/tomathom15/KongAir --token <TOKEN_FROM_GITHUB>
 ```
 
 **Important:** When prompted for the runner name, use something meaningful like `orbstack-runner-01`.
 
-### 5. Install and run the service
+### 7. Install and run the service
 
 Exit back to root, then install and start the runner service:
 
@@ -93,7 +118,7 @@ Verify it's running:
 systemctl status actions-runner
 ```
 
-### 6. Verify on GitHub
+### 8. Verify on GitHub
 
 Go back to:
 ```

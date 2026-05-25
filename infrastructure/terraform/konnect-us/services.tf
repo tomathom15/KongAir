@@ -4,7 +4,7 @@
 
 # Flights Service
 resource "konnect_gateway_service" "flights" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "flights-service"
   host             = "flights.kongair"
   port             = 5052
@@ -15,7 +15,7 @@ resource "konnect_gateway_service" "flights" {
 
 # Routes Service
 resource "konnect_gateway_service" "routes" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "routes-service"
   host             = "routes.kongair"
   port             = 5053
@@ -26,7 +26,7 @@ resource "konnect_gateway_service" "routes" {
 
 # Customers Service
 resource "konnect_gateway_service" "customers" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "customers-service"
   host             = "customers.kongair"
   port             = 5051
@@ -37,7 +37,7 @@ resource "konnect_gateway_service" "customers" {
 
 # Bookings Service
 resource "konnect_gateway_service" "bookings" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "bookings-service"
   host             = "bookings.kongair"
   port             = 5054
@@ -48,7 +48,7 @@ resource "konnect_gateway_service" "bookings" {
 
 # Seating Service
 resource "konnect_gateway_service" "seating" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "seating-service"
   host             = "seating.kongair"
   port             = 5055
@@ -59,7 +59,7 @@ resource "konnect_gateway_service" "seating" {
 
 # Operations Service
 resource "konnect_gateway_service" "operations" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "operations-service"
   host             = "operations.kongair"
   port             = 5056
@@ -70,7 +70,7 @@ resource "konnect_gateway_service" "operations" {
 
 # Ancillary Service
 resource "konnect_gateway_service" "ancillary" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "ancillary-service"
   host             = "ancillary.kongair"
   port             = 5057
@@ -81,7 +81,7 @@ resource "konnect_gateway_service" "ancillary" {
 
 # Experience Service
 resource "konnect_gateway_service" "experience" {
-  control_plane_id = konnect_gateway_control_plane.act1.id
+  control_plane_id = data.konnect_gateway_control_plane.act1.id
   name             = "experience-service"
   host             = "experience.kongair"
   port             = 5050
